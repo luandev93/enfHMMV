@@ -1,0 +1,41 @@
+/* =========================================================
+   Trecho a acrescentar nas regras do projeto farmhmmv.
+   Cole dentro do bloco `match /databases/{database}/documents { ... }`
+   do arquivo firestore.rules do repositório do estoque.
+   ========================================================= */
+
+    // --- Enfermagem -------------------------------------------------
+
+    function perfilEnfermagem() {
+      return perfil().enfermagem;
+    }
+    function ehEnfermagem() {
+      return ativo()
+        && perfilEnfermagem() != null
+        && perfilEnfermagem().ativo == true;
+    }
+    function cargoEnfermagem() {
+      return ehEnfermagem() ? perfilEnfermagem().cargo : 'nenhum';
+    }
+    function ehCoordenacao() {
+      return cargoEnfermagem() == 'Admin'
+          || cargoEnfermagem() == 'Coordenador(a) de Enfermagem';
+    }
+
+    // Relatórios de plantão
+    match /plantoes/{id} {
+      allow read: if ehEnfermagem();
+      // Cria em seu próprio nome.
+      allow create: if ehEnfermagem()
+                    && request.resource.data.authorId == request.auth.uid;
+      // Edita o que é seu; a coordenação edita qualquer um (conferência).
+      allow update: if ehEnfermagem()
+                    && (resource.data.authorId == request.auth.uid || ehCoordenacao());
+      allow delete: if ehCoordenacao();
+    }
+
+    // Escala de plantões
+    match /escalas/{id} {
+      allow read: if ehEnfermagem();
+      allow write: if ehCoordenacao();
+    }

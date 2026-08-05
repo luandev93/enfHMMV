@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "farmhmmv"
+  },
+  "targets": {
+    "farmhmmv": {
+      "hosting": {
+        "enfermagem": [
+          "enfhmmv"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
