@@ -89,7 +89,8 @@ export function paraUsuarioDaTela (p: PerfilUsuario): User {
     coren: p.enfermagem?.coren,
     birthDate: p.nascimento || '',
     username: p.email,
-    pin: ''   // não existe mais: a autenticação é do Firebase
+    pin: '',
+    setor: p.enfermagem?.setorPadrao || ''
   }
 }
 

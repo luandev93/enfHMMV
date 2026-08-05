@@ -7,7 +7,9 @@ export interface User {
   coren?: string;
   birthDate: string; // YYYY-MM-DD
   username: string;
-  pin: string; // Password (defaults to DDMM, customizable)
+  pin: string; // mantido por compatibilidade; a autenticação é do Firebase
+  /** Setor onde a pessoa costuma trabalhar, usado para preencher solicitações. */
+  setor?: string;
 }
 
 export interface ScheduleEntry {

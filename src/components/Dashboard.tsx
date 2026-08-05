@@ -20,7 +20,9 @@ import {
   X
 } from 'lucide-react';
 import { BirthdaysTab } from './BirthdaysTab';
+import { SolicitarFarmacia } from './SolicitarFarmacia';
 import { ScheduleCalendarTab } from './ScheduleCalendarTab';
+import { PackageCheck } from 'lucide-react';
 import { getDayOfWeekName } from './ShiftReportForm';
 
 interface DashboardProps {
@@ -50,7 +52,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onAddScheduleEntry,
   onRemoveScheduleEntry
 }) => {
-  const [activeTab, setActiveTab] = useState<'relatorios' | 'escala' | 'aniversarios'>('relatorios');
+  /* O técnico usa o app para pedir à farmácia e ver aniversários; o registro
+     do plantão é responsabilidade do enfermeiro que assina. */
+  const soFarmacia = currentUser.role === 'Técnico(a) de Enfermagem';
+
+  const [activeTab, setActiveTab] = useState<'relatorios' | 'escala' | 'aniversarios' | 'farmacia'>(
+    soFarmacia ? 'farmacia' : 'relatorios'
+  );
   
   // Minimalist UX Filter States
   const [searchTerm, setSearchTerm] = useState('');
@@ -154,6 +162,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
       <div className="bg-white p-2 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-1 overflow-x-auto scrollbar-none">
           <button
+            onClick={() => setActiveTab('farmacia')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+              activeTab === 'farmacia'
+                ? 'bg-emerald-800 text-white shadow-xs'
+                : 'text-slate-600 hover:bg-slate-100'
+            }`}
+          >
+            <PackageCheck className="w-4 h-4" />
+            <span>Farmácia</span>
+          </button>
+
+          {!soFarmacia && <button
             onClick={() => setActiveTab('relatorios')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
               activeTab === 'relatorios'
@@ -163,9 +183,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
           >
             <FileText className="w-4 h-4" />
             <span>Relatórios ({reports.length})</span>
-          </button>
+          </button>}
 
-          <button
+          {!soFarmacia && <button
             onClick={() => setActiveTab('escala')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
               activeTab === 'escala'
@@ -175,7 +195,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           >
             <Calendar className="w-4 h-4" />
             <span>Escala de Plantão</span>
-          </button>
+          </button>}
 
           <button
             onClick={() => setActiveTab('aniversarios')}
@@ -190,17 +210,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </button>
         </div>
 
-        <button
+        {!soFarmacia && <button
           onClick={onNewReport}
           className="bg-emerald-800 hover:bg-emerald-900 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-xs transition-all flex items-center gap-1.5 active:scale-95 shrink-0"
         >
           <Plus className="w-4 h-4 text-emerald-300" />
           <span>Adicionar novo relatório</span>
-        </button>
+        </button>}
       </div>
 
       {/* Tab Contents */}
-      {activeTab === 'escala' && (
+      {activeTab === 'farmacia' && (
+        <SolicitarFarmacia currentUser={currentUser} />
+      )}
+
+      {activeTab === 'escala' && !soFarmacia && (
         <ScheduleCalendarTab
           currentUser={currentUser}
           users={allUsers}
@@ -214,7 +238,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <BirthdaysTab users={allUsers} />
       )}
 
-      {activeTab === 'relatorios' && (
+      {activeTab === 'relatorios' && !soFarmacia && (
         <div className="space-y-4">
           {/* Minimalist UX Filter Bar */}
           <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3">

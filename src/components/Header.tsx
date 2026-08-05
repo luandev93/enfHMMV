@@ -22,6 +22,7 @@ export const Header: React.FC<HeaderProps> = ({
   onLogout
 }) => {
   const isAdmin = currentUser?.role === 'Admin' || currentUser?.role === 'Coordenador(a) de Enfermagem';
+  const soFarmacia = currentUser?.role === 'Técnico(a) de Enfermagem';
   void isAdmin;
 
   return (
@@ -46,14 +47,14 @@ export const Header: React.FC<HeaderProps> = ({
         {currentUser && (
           <div className="flex items-center gap-2 sm:gap-2.5 ml-auto">
             {/* Button: Adicionar novo relatório */}
-            <button
+            {!soFarmacia && <button
               onClick={onNewReport}
               className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-xl text-xs font-semibold shadow-xs transition-all border border-emerald-400/40 active:scale-95"
               title="Adicionar novo relatório"
             >
               <PlusCircle className="w-4 h-4 text-emerald-200" />
               <span>Adicionar novo relatório</span>
-            </button>
+            </button>}
 
             {/* Pending Signatures Badge */}
             {pendingSignaturesCount > 0 && (
