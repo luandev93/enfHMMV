@@ -38,6 +38,15 @@ export const db = initializeFirestore(app, {
    Nomes das coleções
    ========================================================= */
 
+/** Domínio interno para quem entra só com o nome de usuário. */
+export const DOMINIO_INTERNO = 'hmmv.local'
+
+export const completarLogin = (texto: string) => {
+  const t = String(texto || '').trim()
+  if (!t) return ''
+  return t.includes('@') ? t : `${t.toLowerCase()}@${DOMINIO_INTERNO}`
+}
+
 export const COL = {
   usuarios: 'usuarios',      // compartilhada com o estoque
   plantoes: 'plantoes',      // antigos shift_reports
@@ -59,6 +68,8 @@ export interface PerfilUsuario {
   telefone?: string
   /** Papel no estoque: adm, farmaceutico, auxiliar, enfermagem ou vazio. */
   funcao?: string
+  /** Enquanto verdadeiro, o app exige a troca da senha entregue pela chefia. */
+  senhaProvisoria?: boolean
   enfermagem?: {
     ativo: boolean
     cargo: User['role']

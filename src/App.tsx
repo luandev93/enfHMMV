@@ -9,7 +9,7 @@ import { ReportDetailModal } from './components/ReportDetailModal'
 import { PendingSignaturesModal } from './components/PendingSignaturesModal'
 import { UserManagementModal } from './components/UserManagementModal'
 import { ChangePasswordModal } from './components/ChangePasswordModal'
-import { ProvedorSessao, useSessao } from './lib/sessao'
+import { ProvedorSessao, useSessao, traduzirErro } from './lib/sessao'
 import {
   listarPlantoesRecentes, salvarPlantao, excluirPlantao,
   listarEscalas, salvarEscalas, excluirEscala,
@@ -21,6 +21,59 @@ export default function App () {
     <ProvedorSessao>
       <Aplicacao />
     </ProvedorSessao>
+  )
+}
+
+/** Primeiro acesso: a senha entregue pela chefia precisa ser substituída. */
+function TrocaObrigatoria () {
+  const sessao = useSessao()
+  const [atual, setAtual] = useState('')
+  const [nova, setNova] = useState('')
+  const [confirma, setConfirma] = useState('')
+  const [erro, setErro] = useState('')
+  const [ocupado, setOcupado] = useState(false)
+
+  const campo = 'w-full rounded-lg border-2 border-slate-300 p-3 text-base focus:border-emerald-600 focus:outline-none'
+
+  return (
+    <div className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-3 p-6">
+      <h1 className="text-lg font-bold text-slate-900">Crie a sua senha</h1>
+      <p className="mb-2 text-sm text-slate-600">
+        {sessao.perfil?.nome}, a senha que você recebeu é provisória e outras pessoas
+        podem conhecê-la. Escolha uma senha só sua para continuar.
+      </p>
+
+      <input type="password" className={campo} placeholder="Senha atual"
+        value={atual} onChange={e => setAtual(e.target.value)} />
+      <input type="password" className={campo} placeholder="Senha nova"
+        value={nova} onChange={e => setNova(e.target.value)} />
+      <input type="password" className={campo} placeholder="Repita a senha nova"
+        value={confirma} onChange={e => setConfirma(e.target.value)} />
+
+      {erro && <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{erro}</p>}
+
+      <button
+        disabled={ocupado}
+        onClick={async () => {
+          setErro('')
+          if (nova.length < 6) return setErro('A senha nova precisa ter pelo menos 6 caracteres.')
+          if (nova === atual) return setErro('A senha nova precisa ser diferente da provisória.')
+          if (nova !== confirma) return setErro('As duas senhas novas não coincidem.')
+          setOcupado(true)
+          try {
+            await sessao.trocarSenha(atual, nova)
+            await sessao.concluirTrocaDeSenha()
+          } catch (e: any) {
+            setErro(traduzirErro(e))
+          } finally {
+            setOcupado(false)
+          }
+        }}
+        className="rounded-lg bg-emerald-800 p-4 font-bold text-white disabled:opacity-50"
+      >{ocupado ? 'Salvando…' : 'Salvar e entrar'}</button>
+
+      <button onClick={sessao.sair} className="p-2 text-sm text-slate-500 underline">Sair</button>
+    </div>
   )
 }
 
@@ -229,6 +282,8 @@ function Aplicacao () {
   }
 
   if (!sessao.conta) return <AuthScreen />
+
+  if (sessao.precisaTrocarSenha) return <TrocaObrigatoria />
 
   if (!currentUser) {
     return (

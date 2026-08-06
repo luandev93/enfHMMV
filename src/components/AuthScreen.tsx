@@ -3,6 +3,8 @@ import { Stethoscope, Lock } from 'lucide-react'
 import { useSessao, traduzirErro } from '../lib/sessao'
 import { firebaseConfigurado } from '../lib/firebase'
 
+const VERSAO = '1.2'
+
 /**
  * Entrada do app. Não existe autocadastro: o acesso é criado pela
  * coordenação de enfermagem, junto com o cadastro no sistema do hospital.
@@ -52,8 +54,9 @@ export default function AuthScreen () {
     >
       <form onSubmit={enviar} className="mt-6 space-y-3">
         <input
-          type="email" value={email} onChange={e => setEmail(e.target.value)}
-          placeholder="E-mail" autoCapitalize="none" inputMode="email" autoComplete="email" required
+          type="text" value={email} onChange={e => setEmail(e.target.value)}
+          placeholder="Usuário ou e-mail" autoCapitalize="none" autoCorrect="off"
+          autoComplete="username" required
           className="w-full rounded-lg border-2 border-transparent bg-white/95 p-3.5 text-base text-slate-900 focus:border-sky-400 focus:outline-none"
         />
 
@@ -85,8 +88,8 @@ export default function AuthScreen () {
         </button>
       </form>
 
-      <p className="mt-6 text-center text-xs text-slate-400">
-        O acesso é criado pela coordenação de enfermagem.
+      <p className="mt-6 text-center text-xs text-slate-500">
+        versão {VERSAO} · {new Date().getFullYear()}
       </p>
     </Moldura>
   )

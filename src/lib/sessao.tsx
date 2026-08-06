@@ -13,7 +13,8 @@ import {
   reauthenticateWithCredential, type User as ContaFirebase
 } from 'firebase/auth'
 import { doc, onSnapshot } from 'firebase/firestore'
-import { auth, db, COL, paraUsuarioDaTela, type PerfilUsuario } from './firebase'
+import { doc as docRef, setDoc } from 'firebase/firestore'
+import { auth, db, COL, completarLogin, paraUsuarioDaTela, type PerfilUsuario } from './firebase'
 import type { User } from '../types/nursing'
 
 interface Sessao {
@@ -24,6 +25,8 @@ interface Sessao {
   carregando: boolean
   ehCoordenacao: boolean
   ehEnfermeiro: boolean
+  precisaTrocarSenha: boolean
+  concluirTrocaDeSenha: () => Promise<void>
   entrar: (email: string, senha: string) => Promise<unknown>
   sair: () => Promise<void>
   recuperarSenha: (email: string) => Promise<void>
@@ -65,9 +68,13 @@ export function ProvedorSessao ({ children }: { children: ReactNode }) {
     carregando,
     ehCoordenacao: cargo === 'Admin' || cargo === 'Coordenador(a) de Enfermagem',
     ehEnfermeiro: cargo === 'Enfermeiro(a)' || cargo === 'Admin' || cargo === 'Coordenador(a) de Enfermagem',
-    entrar: (email, senha) => signInWithEmailAndPassword(auth, email.trim(), senha),
+    precisaTrocarSenha: Boolean(perfil?.senhaProvisoria),
+    async concluirTrocaDeSenha () {
+      await setDoc(docRef(db, COL.usuarios, conta!.uid), { senhaProvisoria: false }, { merge: true })
+    },
+    entrar: (email, senha) => signInWithEmailAndPassword(auth, completarLogin(email), senha),
     sair: () => signOut(auth),
-    recuperarSenha: email => sendPasswordResetEmail(auth, email.trim()),
+    recuperarSenha: email => sendPasswordResetEmail(auth, completarLogin(email)),
     async trocarSenha (atual, nova) {
       const cred = EmailAuthProvider.credential(auth.currentUser!.email!, atual)
       await reauthenticateWithCredential(auth.currentUser!, cred)
