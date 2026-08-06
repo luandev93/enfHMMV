@@ -12,6 +12,20 @@ import {
 } from 'firebase/firestore'
 import { db, auth, COL } from './firebase'
 
+/** O Firestore recusa campos indefinidos. */
+function semIndefinidos (valor: any): any {
+  if (Array.isArray(valor)) return valor.map(semIndefinidos)
+  if (valor && typeof valor === 'object' && !valor.toDate) {
+    const saida: any = {}
+    Object.entries(valor).forEach(([k, v]) => {
+      if (v === undefined) return
+      saida[k] = semIndefinidos(v)
+    })
+    return saida
+  }
+  return valor
+}
+
 export interface ItemFarmacia {
   id: string
   codigo: string
@@ -46,9 +60,20 @@ export interface Prescritor {
 }
 
 export async function carregarPrescritores (): Promise<Prescritor[]> {
-  const snap = await getDocs(query(collection(db, 'profissionais'), where('tipo', '==', 'prescritor')))
+  const snap = await getDocs(query(collection(db, COL.usuarios), where('medico.ativo', '==', true)))
   return snap.docs
-    .map(d => ({ id: d.id, ...(d.data() as Omit<Prescritor, 'id'>) }))
+    .map(d => {
+      const p = d.data() as any
+      return {
+        id: d.id,
+        nome: p.nome,
+        conselho: p.conselho?.sigla || '',
+        numero: p.conselho?.numero || '',
+        uf: p.conselho?.uf || '',
+        especialidade: p.medico?.especialidade || ''
+      }
+    })
+    .filter(p => p.nome)
     .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
 }
 
@@ -118,13 +143,24 @@ export async function enviarSolicitacao (s: NovaSolicitacao) {
   const erro = validarSolicitacao(s)
   if (erro) throw new Error(erro)
 
-  await addDoc(collection(db, COL.solicitacoes), {
+  await addDoc(collection(db, COL.solicitacoes), semIndefinidos({
     origem: 'enfermagem',
     status: 'pendente',
     setor: s.setor.trim(),
     setorEstoqueId: s.setorEstoqueId || '',
     paraConsumo: s.paraConsumo !== false,
-    linhas: s.linhas.map(l => ({ ...l, qtdSolicitada: Number(l.qtdSolicitada), qtdAtendida: 0 })),
+    linhas: s.linhas.map(l => ({
+      itemId: l.itemId,
+      codigo: l.codigo,
+      descricao: l.descricao,
+      unidade: l.unidade,
+      tipo: l.tipo || '',
+      controlado: l.controlado || '',
+      exigePaciente: Boolean(l.exigePaciente),
+      consumoInterno: Boolean(l.consumoInterno),
+      qtdSolicitada: Number(l.qtdSolicitada),
+      qtdAtendida: 0
+    })),
     pacienteNome: s.pacienteNome?.trim() || '',
     pacienteCPF: s.pacienteCPF?.trim() || '',
     prescritorNome: s.prescritorNome?.trim() || '',
@@ -135,7 +171,7 @@ export async function enviarSolicitacao (s: NovaSolicitacao) {
     solicitanteNome: s.solicitanteNome,
     solicitanteConselho: s.solicitanteConselho || '',
     criadoEm: serverTimestamp()
-  })
+  }))
 }
 
 export const mascaraCPF = (v: string) => {

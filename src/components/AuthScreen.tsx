@@ -3,7 +3,7 @@ import { Stethoscope, Lock } from 'lucide-react'
 import { useSessao, traduzirErro } from '../lib/sessao'
 import { firebaseConfigurado } from '../lib/firebase'
 
-const VERSAO = '1.2'
+const VERSAO = '1.4'
 
 /**
  * Entrada do app. Não existe autocadastro: o acesso é criado pela

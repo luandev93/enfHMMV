@@ -48,7 +48,7 @@ export const completarLogin = (texto: string) => {
 }
 
 export const COL = {
-  usuarios: 'usuarios',      // compartilhada com o estoque
+  usuarios: 'pessoas',       // cadastro único, compartilhado com o estoque
   plantoes: 'plantoes',      // antigos shift_reports
   escalas: 'escalas',        // antigos schedules
   solicitacoes: 'solicitacoes'
@@ -66,16 +66,18 @@ export interface PerfilUsuario {
   ativo: boolean
   nascimento?: string
   telefone?: string
-  /** Papel no estoque: adm, farmaceutico, auxiliar, enfermagem ou vazio. */
-  funcao?: string
+  /** Participação em cada módulo do hospital. */
+  farmacia?: { ativo: boolean; funcao: string; rt?: boolean }
+  medico?: { ativo: boolean; especialidade?: string; rt?: boolean }
   /** Enquanto verdadeiro, o app exige a troca da senha entregue pela chefia. */
   senhaProvisoria?: boolean
   enfermagem?: {
     ativo: boolean
     cargo: User['role']
-    coren?: string
     setorPadrao?: string
+    rt?: boolean
   }
+  conselho?: { sigla?: string; numero?: string; uf?: string }
 }
 
 export async function lerPerfil (uid: string): Promise<PerfilUsuario | null> {
@@ -97,7 +99,7 @@ export function paraUsuarioDaTela (p: PerfilUsuario): User {
     id: p.id,
     name: p.nome,
     role: p.enfermagem?.cargo || 'Técnico(a) de Enfermagem',
-    coren: p.enfermagem?.coren,
+    coren: [p.conselho?.sigla, p.conselho?.numero, p.conselho?.uf].filter(Boolean).join(' '),
     birthDate: p.nascimento || '',
     username: p.email,
     pin: '',
@@ -166,13 +168,14 @@ export interface SetorEstoque {
   setor: string
 }
 
+/** Locais que a farmácia liberou para receber requisição da enfermagem. */
 export async function listarSetoresComEstoque (): Promise<SetorEstoque[]> {
   const snap = await getDocs(collection(db, 'estoques'))
   return snap.docs
     .map(d => ({ id: d.id, ...(d.data() as any) }))
-    .filter(e => e.ativo !== false && e.setorEnfermagem)
-    .map(e => ({ id: e.id, nome: e.nome, setor: e.setorEnfermagem }))
-    .sort((a, b) => a.setor.localeCompare(b.setor, 'pt-BR'))
+    .filter(e => e.ativo !== false && e.requisicaoEnfermagem)
+    .map(e => ({ id: e.id, nome: e.nome, setor: e.nome }))
+    .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
 }
 
 export async function salvarPlantao (relatorio: ShiftReport, autorUid?: string) {

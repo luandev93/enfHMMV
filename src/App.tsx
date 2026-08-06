@@ -10,6 +10,8 @@ import { PendingSignaturesModal } from './components/PendingSignaturesModal'
 import { UserManagementModal } from './components/UserManagementModal'
 import { ChangePasswordModal } from './components/ChangePasswordModal'
 import { ProvedorSessao, useSessao, traduzirErro } from './lib/sessao'
+
+export const VERSAO = '1.4'
 import {
   listarPlantoesRecentes, salvarPlantao, excluirPlantao,
   listarEscalas, salvarEscalas, excluirEscala,
@@ -357,7 +359,7 @@ function Aplicacao () {
         <footer className="mt-auto border-t border-slate-700 bg-slate-800 px-4 py-4 text-center text-xs text-slate-400 print:hidden">
           <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 sm:flex-row">
             <span>Hospital Municipal Maria Veneri • Relatório da Equipe de Enfermagem</span>
-            <span>Acesso individual autenticado</span>
+            <span>versão {VERSAO} · {new Date().getFullYear()}</span>
           </div>
         </footer>
       </div>

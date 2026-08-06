@@ -11,7 +11,7 @@ import { listarSetoresComEstoque, type SetorEstoque } from '../lib/firebase'
 const semAcento = (t: string) =>
   t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
 
-const SETORES = ['Pronto-Socorro', 'Clínica Médica', 'Sala de Parto', 'UTI']
+const CHAVE_SETOR = 'ultimo-setor'
 
 /**
  * Pedido de medicamento e material à farmácia. Nada sai do estoque aqui:
@@ -22,7 +22,11 @@ export function SolicitarFarmacia ({ currentUser }: { currentUser: User }) {
   const [prescritores, setPrescritores] = useState<Prescritor[]>([])
   const [carregando, setCarregando] = useState(true)
 
-  const [setor, setSetor] = useState(currentUser.setor || '')
+  /* O enfermeiro circula entre setores; lembrar o último poupa toques
+     sem fixar ninguém a um lugar. Vale só enquanto a sessão durar. */
+  const [setor, setSetor] = useState(() => {
+    try { return sessionStorage.getItem(CHAVE_SETOR) || '' } catch { return '' }
+  })
   const [paraConsumo, setParaConsumo] = useState(true)
   const [setoresComEstoque, setSetoresComEstoque] = useState<SetorEstoque[]>([])
   const [busca, setBusca] = useState('')
@@ -158,11 +162,15 @@ export function SolicitarFarmacia ({ currentUser }: { currentUser: User }) {
       <section className="rounded-2xl border border-slate-200 bg-white p-4">
         <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">Setor</label>
         <select
-          value={setor} onChange={e => setSetor(e.target.value)}
+          value={setor}
+          onChange={e => {
+            setSetor(e.target.value)
+            try { sessionStorage.setItem(CHAVE_SETOR, e.target.value) } catch (err) { /* sem armazenamento */ }
+          }}
           className="w-full rounded-lg border-2 border-slate-300 p-3 text-base focus:border-emerald-600 focus:outline-none"
         >
           <option value="">Escolha o setor…</option>
-          {SETORES.map(s => <option key={s} value={s}>{s}</option>)}
+          {setoresComEstoque.map(s => <option key={s.id} value={s.setor}>{s.setor}</option>)}
         </select>
 
         <label className="mt-4 flex items-start gap-3">
@@ -180,6 +188,13 @@ export function SolicitarFarmacia ({ currentUser }: { currentUser: User }) {
             </span>
           </span>
         </label>
+
+        {setoresComEstoque.length === 0 && !carregando && (
+          <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+            Nenhum setor liberado ainda. A farmácia precisa habilitar os locais em
+            Locais de estoque.
+          </p>
+        )}
 
         {!paraConsumo && setor && !estoqueDoSetor && (
           <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
