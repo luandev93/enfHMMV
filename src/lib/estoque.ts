@@ -21,6 +21,10 @@ export interface ItemFarmacia {
   principioAtivo: string
   /** Classe da Portaria 344 (A1, B1, C1...). Vazio quando não é controlado. */
   controlado: string
+  /** Item que só sai com paciente e prescritor identificados. */
+  exigePaciente?: boolean
+  /** Item de uso coletivo: nunca sai em nome de paciente. */
+  consumoInterno?: boolean
   ativo: boolean
 }
 
@@ -58,11 +62,17 @@ export interface LinhaSolicitacao {
   unidade: string
   tipo: string
   controlado: string
+  exigePaciente?: boolean
+  consumoInterno?: boolean
   qtdSolicitada: number
 }
 
 export interface NovaSolicitacao {
   setor: string
+  /** Local de estoque do setor, para onde vai a reposição. */
+  setorEstoqueId?: string
+  /** Marcado: o item é consumido agora. Desmarcado: entra no estoque do setor. */
+  paraConsumo: boolean
   linhas: LinhaSolicitacao[]
   pacienteNome?: string
   pacienteCPF?: string
@@ -73,19 +83,29 @@ export interface NovaSolicitacao {
   solicitanteConselho?: string
 }
 
-/** Item de controle especial exige paciente e prescritor identificados. */
+/** Precisa identificar paciente e prescritor? Item de uso coletivo nunca precisa. */
+export const exigeIdentificacao = (l: LinhaSolicitacao) =>
+  !l.consumoInterno && Boolean(l.controlado || l.exigePaciente)
+
 export function validarSolicitacao (s: NovaSolicitacao): string | null {
   if (!s.linhas.length) return 'Adicione pelo menos um item.'
   if (s.linhas.some(l => !(l.qtdSolicitada > 0))) return 'Há item sem quantidade.'
   if (!s.setor?.trim()) return 'Informe o setor.'
 
-  const controlado = s.linhas.find(l => l.controlado)
-  if (controlado) {
+  if (!s.paraConsumo && !s.setorEstoqueId) {
+    return 'Este setor ainda não tem estoque próprio no sistema. Peça à farmácia para vincular, ou marque que o item será consumido agora.'
+  }
+
+  // Reposição de estoque não sai em nome de paciente.
+  if (!s.paraConsumo) return null
+
+  const exigente = s.linhas.find(exigeIdentificacao)
+  if (exigente) {
     if (!s.pacienteNome?.trim()) {
-      return `"${controlado.descricao}" é de controle especial: o nome do paciente é obrigatório.`
+      return `"${exigente.descricao}" só é dispensado com o nome do paciente.`
     }
     if (!s.prescritorNome?.trim()) {
-      return `"${controlado.descricao}" é de controle especial: o prescritor é obrigatório.`
+      return `"${exigente.descricao}" só é dispensado com o prescritor identificado.`
     }
   }
   return null
@@ -102,6 +122,8 @@ export async function enviarSolicitacao (s: NovaSolicitacao) {
     origem: 'enfermagem',
     status: 'pendente',
     setor: s.setor.trim(),
+    setorEstoqueId: s.setorEstoqueId || '',
+    paraConsumo: s.paraConsumo !== false,
     linhas: s.linhas.map(l => ({ ...l, qtdSolicitada: Number(l.qtdSolicitada), qtdAtendida: 0 })),
     pacienteNome: s.pacienteNome?.trim() || '',
     pacienteCPF: s.pacienteCPF?.trim() || '',

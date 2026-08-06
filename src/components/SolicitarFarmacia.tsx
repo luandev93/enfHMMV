@@ -2,9 +2,11 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Plus, Search, Trash2, X, Send, PackageCheck, CheckCircle2 } from 'lucide-react'
 import type { User } from '../types/nursing'
 import {
-  carregarCatalogo, carregarPrescritores, enviarSolicitacao, mascaraCPF, registroDe,
-  validarSolicitacao, type ItemFarmacia, type LinhaSolicitacao, type Prescritor
+  carregarCatalogo, carregarPrescritores, enviarSolicitacao, exigeIdentificacao,
+  mascaraCPF, registroDe, validarSolicitacao,
+  type ItemFarmacia, type LinhaSolicitacao, type Prescritor
 } from '../lib/estoque'
+import { listarSetoresComEstoque, type SetorEstoque } from '../lib/firebase'
 
 const semAcento = (t: string) =>
   t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
@@ -21,6 +23,8 @@ export function SolicitarFarmacia ({ currentUser }: { currentUser: User }) {
   const [carregando, setCarregando] = useState(true)
 
   const [setor, setSetor] = useState(currentUser.setor || '')
+  const [paraConsumo, setParaConsumo] = useState(true)
+  const [setoresComEstoque, setSetoresComEstoque] = useState<SetorEstoque[]>([])
   const [busca, setBusca] = useState('')
   const [escolhido, setEscolhido] = useState<ItemFarmacia | null>(null)
   const [qtd, setQtd] = useState('')
@@ -39,8 +43,8 @@ export function SolicitarFarmacia ({ currentUser }: { currentUser: User }) {
   const campoQtd = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    Promise.all([carregarCatalogo(), carregarPrescritores()])
-      .then(([c, p]) => { setCatalogo(c); setPrescritores(p) })
+    Promise.all([carregarCatalogo(), carregarPrescritores(), listarSetoresComEstoque()])
+      .then(([c, p, s]) => { setCatalogo(c); setPrescritores(p); setSetoresComEstoque(s) })
       .catch(e => setErro(e?.message || 'Não foi possível carregar o catálogo da farmácia.'))
       .finally(() => setCarregando(false))
   }, [])
@@ -58,7 +62,9 @@ export function SolicitarFarmacia ({ currentUser }: { currentUser: User }) {
     return prescritores.filter(p => !t || semAcento(`${p.nome} ${p.numero || ''}`).includes(t)).slice(0, 15)
   }, [buscaPrescritor, prescritores])
 
-  const temControlado = linhas.some(l => l.controlado)
+  const precisaIdentificar = paraConsumo && linhas.some(exigeIdentificacao)
+  const soUsoColetivo = linhas.length > 0 && linhas.every(l => l.consumoInterno)
+  const estoqueDoSetor = setoresComEstoque.find(s => s.setor === setor)
 
   function adicionar () {
     setErro('')
@@ -80,6 +86,8 @@ export function SolicitarFarmacia ({ currentUser }: { currentUser: User }) {
         unidade: escolhido.unidade,
         tipo: escolhido.tipo,
         controlado: escolhido.controlado || '',
+        exigePaciente: escolhido.exigePaciente,
+        consumoInterno: escolhido.consumoInterno,
         qtdSolicitada: n
       }]
     })
@@ -88,8 +96,17 @@ export function SolicitarFarmacia ({ currentUser }: { currentUser: User }) {
 
   async function enviar () {
     const dados = {
-      setor, linhas, pacienteNome, pacienteCPF, prescritorNome, prescritorConselho,
-      observacao, solicitanteNome: currentUser.name, solicitanteConselho: currentUser.coren
+      setor,
+      setorEstoqueId: estoqueDoSetor?.id,
+      paraConsumo,
+      linhas,
+      pacienteNome: paraConsumo ? pacienteNome : '',
+      pacienteCPF: paraConsumo ? pacienteCPF : '',
+      prescritorNome: paraConsumo ? prescritorNome : '',
+      prescritorConselho: paraConsumo ? prescritorConselho : '',
+      observacao,
+      solicitanteNome: currentUser.name,
+      solicitanteConselho: currentUser.coren
     }
     const problema = validarSolicitacao(dados)
     if (problema) return setErro(problema)
@@ -147,6 +164,29 @@ export function SolicitarFarmacia ({ currentUser }: { currentUser: User }) {
           <option value="">Escolha o setor…</option>
           {SETORES.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
+
+        <label className="mt-4 flex items-start gap-3">
+          <input
+            type="checkbox" checked={paraConsumo}
+            onChange={e => setParaConsumo(e.target.checked)}
+            className="mt-0.5 h-5 w-5 shrink-0 accent-emerald-700"
+          />
+          <span className="text-sm">
+            O item será consumido agora
+            <span className="mt-0.5 block text-xs text-slate-500">
+              {paraConsumo
+                ? 'A farmácia dá baixa definitiva ao liberar.'
+                : `O item entra no estoque de ${estoqueDoSetor?.nome || 'do setor'} e é baixado quando for usado.`}
+            </span>
+          </span>
+        </label>
+
+        {!paraConsumo && setor && !estoqueDoSetor && (
+          <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+            {setor} ainda não tem estoque próprio no sistema. Peça à farmácia para vincular
+            o setor a um local, ou marque que o item será consumido agora.
+          </p>
+        )}
       </section>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-4">
@@ -230,6 +270,10 @@ export function SolicitarFarmacia ({ currentUser }: { currentUser: User }) {
                 <p className="text-xs text-slate-500">
                   {l.codigo}
                   {l.controlado && <span className="ml-2 font-bold text-purple-700">controle especial</span>}
+                  {l.consumoInterno && <span className="ml-2 text-slate-500">uso coletivo</span>}
+                  {!l.controlado && l.exigePaciente && (
+                    <span className="ml-2 font-bold text-amber-700">exige paciente</span>
+                  )}
                 </p>
               </div>
               <span className="text-base font-bold tabular-nums">{l.qtdSolicitada}</span>
@@ -242,16 +286,17 @@ export function SolicitarFarmacia ({ currentUser }: { currentUser: User }) {
         </section>
       )}
 
+      {paraConsumo && !soUsoColetivo && (
       <section className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4">
         <p className="text-xs text-slate-500">
-          {temControlado
-            ? 'Há item de controle especial: paciente e prescritor são obrigatórios.'
+          {precisaIdentificar
+            ? 'Há item que só é dispensado com paciente e prescritor identificados.'
             : 'Preenchimento opcional.'}
         </p>
 
         <div>
           <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
-            Paciente {temControlado && <span className="text-red-600">*</span>}
+            Paciente {precisaIdentificar && <span className="text-red-600">*</span>}
           </label>
           <input
             value={pacienteNome} onChange={e => setPacienteNome(e.target.value)}
@@ -270,53 +315,28 @@ export function SolicitarFarmacia ({ currentUser }: { currentUser: User }) {
 
         <div>
           <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
-            Médico prescritor {temControlado && <span className="text-red-600">*</span>}
+            Médico prescritor {precisaIdentificar && <span className="text-red-600">*</span>}
           </label>
-          {prescritorNome ? (
-            <div className="flex items-center gap-2 rounded-lg border-2 border-emerald-600 p-3">
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold">{prescritorNome}</p>
-                {prescritorConselho && <p className="text-xs text-slate-500">{prescritorConselho}</p>}
-              </div>
-              <button
-                onClick={() => { setPrescritorNome(''); setPrescritorConselho('') }}
-                className="text-slate-400"
-              ><X size={18} /></button>
-            </div>
-          ) : (
-            <div className="relative">
-              <input
-                value={buscaPrescritor}
-                onChange={e => setBuscaPrescritor(e.target.value)}
-                onBlur={() => setTimeout(() => {
-                  if (buscaPrescritor.trim()) setPrescritorNome(buscaPrescritor.trim())
-                }, 180)}
-                placeholder="Nome do prescritor"
-                className="w-full rounded-lg border-2 border-slate-300 p-3 text-base focus:border-emerald-600 focus:outline-none"
-              />
-              {buscaPrescritor && prescritoresFiltrados.length > 0 && (
-                <ul className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto rounded-lg border border-slate-300 bg-white shadow-lg">
-                  {prescritoresFiltrados.map(p => (
-                    <li key={p.id}>
-                      <button
-                        onMouseDown={e => e.preventDefault()}
-                        onClick={() => {
-                          setPrescritorNome(p.nome)
-                          setPrescritorConselho(registroDe(p))
-                          setBuscaPrescritor('')
-                        }}
-                        className="block w-full border-b border-slate-100 p-3 text-left hover:bg-slate-50"
-                      >
-                        <p className="text-sm font-semibold">{p.nome}</p>
-                        <p className="text-xs text-slate-500">
-                          {registroDe(p)}{p.especialidade ? ` · ${p.especialidade}` : ''}
-                        </p>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
+          <select
+            value={prescritorNome}
+            onChange={e => {
+              const p = prescritores.find(x => x.nome === e.target.value)
+              setPrescritorNome(e.target.value)
+              setPrescritorConselho(p ? registroDe(p) : '')
+            }}
+            className="w-full rounded-lg border-2 border-slate-300 p-3 text-base focus:border-emerald-600 focus:outline-none"
+          >
+            <option value="">
+              {prescritores.length ? 'Selecionar prescritor…' : 'Nenhum prescritor cadastrado'}
+            </option>
+            {prescritores.map(p => (
+              <option key={p.id} value={p.nome}>
+                {p.nome}{registroDe(p) ? ` — ${registroDe(p)}` : ''}
+              </option>
+            ))}
+          </select>
+          {prescritorConselho && (
+            <p className="mt-1 text-xs text-slate-500">{prescritorConselho}</p>
           )}
         </div>
 
@@ -331,6 +351,7 @@ export function SolicitarFarmacia ({ currentUser }: { currentUser: User }) {
           />
         </div>
       </section>
+      )}
 
       {erro && (
         <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{erro}</p>

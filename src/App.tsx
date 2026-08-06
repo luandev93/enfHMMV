@@ -107,7 +107,9 @@ function Aplicacao () {
         listarPlantoesRecentes(60),
         listarEscalas()
       ])
-      setUsers(equipe.map(paraUsuarioDaTela))
+      /* Admin entra para conferir e administrar; não aparece como plantonista
+         nem como coautor de relatório. */
+      setUsers(equipe.filter(p => p.enfermagem?.cargo !== 'Admin').map(paraUsuarioDaTela))
       setReports(plantoes)
       setSchedule(escalas)
     } catch (e: any) {
@@ -127,7 +129,7 @@ function Aplicacao () {
      --------------------------------------------------------- */
 
   const gravar = async (relatorio: ShiftReport) => {
-    const id = await salvarPlantao(relatorio)
+    const id = await salvarPlantao(relatorio, sessao.conta?.uid)
     const completo = { ...relatorio, id }
     setReports(a => {
       const i = a.findIndex(r => r.id === id)

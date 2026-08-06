@@ -142,7 +142,40 @@ export function listarPlantoesRecentes (dias = 60, maximo = 120) {
 
 const LIMITE_ANEXOS = 700 * 1024   // folga dentro do teto de 1 MiB do documento
 
-export async function salvarPlantao (relatorio: ShiftReport) {
+/**
+ * O Firestore recusa campos com valor indefinido, coisa que o localStorage
+ * aceitava sem reclamar. Remove essas chaves antes de gravar.
+ */
+function semIndefinidos<T> (valor: T): T {
+  if (Array.isArray(valor)) return valor.map(semIndefinidos) as unknown as T
+  if (valor && typeof valor === 'object' && !(valor as any).toDate) {
+    const saida: any = {}
+    Object.entries(valor as any).forEach(([k, v]) => {
+      if (v === undefined) return
+      saida[k] = semIndefinidos(v)
+    })
+    return saida
+  }
+  return valor
+}
+
+/** Locais de estoque vinculados a um setor da enfermagem. */
+export interface SetorEstoque {
+  id: string
+  nome: string
+  setor: string
+}
+
+export async function listarSetoresComEstoque (): Promise<SetorEstoque[]> {
+  const snap = await getDocs(collection(db, 'estoques'))
+  return snap.docs
+    .map(d => ({ id: d.id, ...(d.data() as any) }))
+    .filter(e => e.ativo !== false && e.setorEnfermagem)
+    .map(e => ({ id: e.id, nome: e.nome, setor: e.setorEnfermagem }))
+    .sort((a, b) => a.setor.localeCompare(b.setor, 'pt-BR'))
+}
+
+export async function salvarPlantao (relatorio: ShiftReport, autorUid?: string) {
   const peso = (relatorio.attachments || [])
     .reduce((s, a) => s + (a.dataUrl?.length || 0), 0)
   if (peso > LIMITE_ANEXOS) {
@@ -153,12 +186,18 @@ export async function salvarPlantao (relatorio: ShiftReport) {
   }
 
   const id = relatorio.id || doc(collection(db, COL.plantoes)).id
-  await setDoc(doc(db, COL.plantoes, id), {
+
+  /* As regras exigem que o autor seja quem está logado. O formato antigo
+     guardava um id próprio do app, que não corresponde à conta do Firebase. */
+  const corpo = semIndefinidos({
     ...relatorio,
     id,
+    authorId: autorUid || relatorio.authorId,
     updatedAt: Date.now(),
     atualizadoEm: serverTimestamp()
-  }, { merge: true })
+  })
+
+  await setDoc(doc(db, COL.plantoes, id), corpo, { merge: true })
   return id
 }
 
