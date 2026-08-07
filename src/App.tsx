@@ -11,7 +11,7 @@ import { UserManagementModal } from './components/UserManagementModal'
 import { ChangePasswordModal } from './components/ChangePasswordModal'
 import { ProvedorSessao, useSessao, traduzirErro } from './lib/sessao'
 
-export const VERSAO = '1.4'
+export const VERSAO = '1.6'
 import {
   listarPlantoesRecentes, salvarPlantao, excluirPlantao,
   listarEscalas, salvarEscalas, excluirEscala,

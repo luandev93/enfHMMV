@@ -1,9 +1,9 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
-import { Stethoscope, Lock } from 'lucide-react'
+import { Stethoscope, Lock, Eye, EyeOff } from 'lucide-react'
 import { useSessao, traduzirErro } from '../lib/sessao'
 import { firebaseConfigurado } from '../lib/firebase'
 
-const VERSAO = '1.4'
+const VERSAO = '1.6'
 
 /**
  * Entrada do app. Não existe autocadastro: o acesso é criado pela
@@ -17,6 +17,7 @@ export default function AuthScreen () {
   const [erro, setErro] = useState('')
   const [recado, setRecado] = useState('')
   const [ocupado, setOcupado] = useState(false)
+  const [verSenha, setVerSenha] = useState(false)
 
   if (!firebaseConfigurado) {
     return (
@@ -57,15 +58,27 @@ export default function AuthScreen () {
           type="text" value={email} onChange={e => setEmail(e.target.value)}
           placeholder="Usuário ou e-mail" autoCapitalize="none" autoCorrect="off"
           autoComplete="username" required
-          className="w-full rounded-lg border-2 border-transparent bg-white/95 p-3.5 text-base text-slate-900 focus:border-sky-400 focus:outline-none"
+          className="w-full rounded-lg border-2 border-transparent bg-white p-3.5 text-base text-slate-900 placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
         />
 
         {modo === 'entrar' && (
-          <input
-            type="password" value={senha} onChange={e => setSenha(e.target.value)}
-            placeholder="Senha" autoComplete="current-password" required
-            className="w-full rounded-lg border-2 border-transparent bg-white/95 p-3.5 text-base text-slate-900 focus:border-sky-400 focus:outline-none"
-          />
+          <div className="relative">
+            <input
+              type={verSenha ? 'text' : 'password'}
+              value={senha} onChange={e => setSenha(e.target.value)}
+              placeholder="Senha" autoComplete="current-password" required
+              className="w-full rounded-lg border-2 border-transparent bg-white p-3.5 pr-14 text-base text-slate-900 placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
+            />
+            <button
+              type="button"
+              onClick={() => setVerSenha(v => !v)}
+              aria-label={verSenha ? 'Ocultar senha' : 'Mostrar senha'}
+              aria-pressed={verSenha}
+              className="absolute right-2 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-lg text-slate-500"
+            >
+              {verSenha ? <Eye size={20} /> : <EyeOff size={20} />}
+            </button>
+          </div>
         )}
 
         {erro && <p className="rounded-lg bg-red-500/15 p-3 text-sm text-red-200">{erro}</p>}

@@ -82,9 +82,8 @@ export const ShiftReportForm: React.FC<ShiftReportFormProps> = ({
   const [recebimentoPlantao, setRecebimentoPlantao] = useState<string>(
     initialReport?.recebimentoPlantao || ''
   );
-  const [attachments, setAttachments] = useState<Attachment[]>(
-    initialReport?.attachments || []
-  );
+  // Anexos foram desativados: relatório de plantão não carrega arquivo.
+  const attachments: Attachment[] = [];
 
   // 3.2 Ocorrências / Leitos (Altas, Admissões, Transferências, Óbitos, Nascimentos, Gestantes)
   const [movement, setMovement] = useState<PatientMovement>(
@@ -191,44 +190,6 @@ export const ShiftReportForm: React.FC<ShiftReportFormProps> = ({
       };
       reader.readAsDataURL(file);
     });
-  };
-
-  // Attachment upload handler
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    for (const file of Array.from(files) as File[]) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert(`O arquivo "${file.name}" excede 5MB. Por favor, escolha um arquivo menor.`);
-        continue;
-      }
-
-      let dataUrl = '';
-      if (file.type.startsWith('image/')) {
-        dataUrl = await compressImage(file);
-      } else {
-        dataUrl = await new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onload = (event) => resolve(event.target?.result as string);
-          reader.readAsDataURL(file);
-        });
-      }
-
-      const newAttachment: Attachment = {
-        id: `att-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-        name: file.name,
-        size: Math.round(dataUrl.length * 0.75), // aproximadamente em bytes
-        type: file.type.startsWith('image/') ? 'image/jpeg' : file.type,
-        dataUrl,
-        uploadedAt: Date.now()
-      };
-      setAttachments((prev) => [...prev, newAttachment]);
-    }
-  };
-
-  const removeAttachment = (id: string) => {
-    setAttachments((prev) => prev.filter((a) => a.id !== id));
   };
 
   // Checklist Item updates
@@ -550,46 +511,6 @@ export const ShiftReportForm: React.FC<ShiftReportFormProps> = ({
           />
         </div>
 
-        {/* Anexos */}
-        <div className="pt-2">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
-              <Paperclip className="w-3.5 h-3.5 text-slate-500" />
-              Anexos do Relatório
-            </label>
-            <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs px-3 py-1 rounded-lg border border-slate-300 flex items-center gap-1.5 transition-colors">
-              <Upload className="w-3.5 h-3.5 text-slate-600" />
-              Anexar
-              <input
-                type="file"
-                multiple
-                accept="image/*,application/pdf,.doc,.docx"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
-            </label>
-          </div>
-
-          {attachments.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-2">
-              {attachments.map((att) => (
-                <div
-                  key={att.id}
-                  className="bg-slate-100 border border-slate-200 text-slate-800 text-xs px-2.5 py-1 rounded-lg flex items-center gap-2"
-                >
-                  <span className="font-medium truncate max-w-[180px]">{att.name}</span>
-                  <button
-                    type="button"
-                    onClick={() => removeAttachment(att.id)}
-                    className="text-slate-400 hover:text-rose-600 transition-colors"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
       </div>
 
       {/* SECTION 3: MOVIMENTAÇÃO DE LEITOS (Incluindo Altas, Admissões, Transferências, Óbitos, Nascimentos, Gestantes) */}
