@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { User } from '../types/nursing';
-import { Cake, Calendar, Search, UserCheck, Heart } from 'lucide-react';
+import { Cake, Calendar, Search, UserCheck, Heart, RefreshCw } from 'lucide-react';
 
 interface BirthdaysTabProps {
   users: User[];
+  onAtualizar?: () => void;
 }
 
-export const BirthdaysTab: React.FC<BirthdaysTabProps> = ({ users }) => {
+export const BirthdaysTab: React.FC<BirthdaysTabProps> = ({ users, onAtualizar }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
 
@@ -82,6 +83,17 @@ export const BirthdaysTab: React.FC<BirthdaysTabProps> = ({ users }) => {
           <p className="text-xs text-slate-500 mt-0.5">
             Acompanhe e celebre a data de nascimento dos profissionais de enfermagem.
           </p>
+          {onAtualizar && (
+            <button
+              type="button"
+              onClick={onAtualizar}
+              className="mt-2 flex items-center gap-1 text-[11px] text-emerald-700 hover:text-emerald-900 font-semibold"
+              title="Atualizar lista de aniversariantes"
+            >
+              <RefreshCw className="w-3 h-3" />
+              Atualizar Aniversários
+            </button>
+          )}
         </div>
 
         {todayBirthdays.length > 0 && (
