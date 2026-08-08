@@ -26,6 +26,8 @@ interface Sessao {
   ehCoordenacao: boolean
   ehEnfermeiro: boolean
   precisaTrocarSenha: boolean
+  /** Motivo pelo qual o acesso foi negado (null quando liberado ou sem conta). */
+  motivoBloqueio: 'sem-cadastro' | 'inativo' | 'enfermagem-inativa' | 'sem-enfermagem' | null
   concluirTrocaDeSenha: () => Promise<void>
   entrar: (email: string, senha: string) => Promise<unknown>
   sair: () => Promise<void>
@@ -54,12 +56,29 @@ export function ProvedorSessao ({ children }: { children: ReactNode }) {
         setPerfil(s.exists() ? ({ id: s.id, ...s.data() } as PerfilUsuario) : null)
         setCarregando(false)
       },
-      () => { setPerfil(null); setCarregando(false) }
+      err => {
+        // Erro de permissão ao ler o perfil: o usuário existe no Auth mas
+        // as regras do Firestore negaram a leitura. Armazenamos um perfil
+        // mínimo para que a tela possa exibir a mensagem correta.
+        console.error('Erro ao carregar perfil:', err)
+        setPerfil(null)
+        setCarregando(false)
+      }
     )
   }, [conta])
 
   const liberado = Boolean(perfil?.ativo && perfil?.enfermagem?.ativo)
   const cargo = liberado ? perfil!.enfermagem!.cargo : null
+
+  /** Razão do bloqueio quando o usuário tem conta mas não pode entrar. */
+  const motivoBloqueio: Sessao['motivoBloqueio'] = (() => {
+    if (!conta || liberado) return null
+    if (!perfil) return 'sem-cadastro'
+    if (!perfil.ativo) return 'inativo'
+    if (!perfil.enfermagem) return 'sem-enfermagem'
+    if (!perfil.enfermagem.ativo) return 'enfermagem-inativa'
+    return null
+  })()
 
   const valor: Sessao = {
     conta,
@@ -69,6 +88,7 @@ export function ProvedorSessao ({ children }: { children: ReactNode }) {
     ehCoordenacao: cargo === 'Admin' || cargo === 'Coordenador(a) de Enfermagem',
     ehEnfermeiro: cargo === 'Enfermeiro(a)' || cargo === 'Admin' || cargo === 'Coordenador(a) de Enfermagem',
     precisaTrocarSenha: Boolean(perfil?.senhaProvisoria),
+    motivoBloqueio,
     async concluirTrocaDeSenha () {
       await setDoc(docRef(db, COL.usuarios, conta!.uid), { senhaProvisoria: false }, { merge: true })
     },

@@ -11,7 +11,7 @@ import { getAuth } from 'firebase/auth'
 import {
   initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
   collection, doc, getDoc, getDocs, setDoc, deleteDoc, query, where, orderBy,
-  limit, serverTimestamp, writeBatch, Timestamp
+  limit, serverTimestamp, writeBatch, Timestamp, onSnapshot
 } from 'firebase/firestore'
 import type { ShiftReport, ScheduleEntry, User } from '../types/nursing'
 
@@ -85,15 +85,62 @@ export async function lerPerfil (uid: string): Promise<PerfilUsuario | null> {
   return s.exists() ? ({ id: s.id, ...s.data() } as PerfilUsuario) : null
 }
 
-/** Só quem tem a parte de enfermagem ativa aparece nas listas do app. */
+/**
+ * Retorna quem tem `enfermagem.ativo = true`.
+ * Se a consulta principal retornar vazia (ninguém tem o campo setado ainda),
+ * usa como fallback todas as pessoas com `ativo = true` para não deixar o
+ * select vazio.
+ */
 export async function listarEquipe (): Promise<PerfilUsuario[]> {
-  const snap = await getDocs(query(collection(db, COL.usuarios), where('enfermagem.ativo', '==', true)))
-  return snap.docs
+  const snapPrincipal = await getDocs(
+    query(collection(db, COL.usuarios), where('enfermagem.ativo', '==', true))
+  )
+  if (!snapPrincipal.empty) {
+    return snapPrincipal.docs
+      .map(d => ({ id: d.id, ...d.data() } as PerfilUsuario))
+      .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+  }
+  // Fallback: busca pessoas ativas mesmo sem enfermagem.ativo
+  const snapFallback = await getDocs(
+    query(collection(db, COL.usuarios), where('ativo', '==', true))
+  )
+  return snapFallback.docs
     .map(d => ({ id: d.id, ...d.data() } as PerfilUsuario))
     .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
 }
 
-/** Converte o perfil do banco para o formato que as telas já esperam. */
+/**
+ * Listener em tempo real para a equipe de enfermagem.
+ * Retorna a função de cancelamento (unsubscribe).
+ */
+export function ouvirEquipe (
+  onDados: (equipe: PerfilUsuario[]) => void,
+  onErro?: (e: Error) => void
+): () => void {
+  const q = query(collection(db, COL.usuarios), where('enfermagem.ativo', '==', true))
+  const unsub = onSnapshot(
+    q,
+    async snap => {
+      let lista = snap.docs.map(d => ({ id: d.id, ...d.data() } as PerfilUsuario))
+      if (lista.length === 0) {
+        // Fallback direto: pessoas com ativo=true, sem delegar para listarEquipe
+        try {
+          const fallback = await getDocs(
+            query(collection(db, COL.usuarios), where('ativo', '==', true))
+          )
+          lista = fallback.docs.map(d => ({ id: d.id, ...d.data() } as PerfilUsuario))
+        } catch (e) {
+          onErro?.(e as Error)
+          return
+        }
+      }
+      lista = lista.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+      onDados(lista)
+    },
+    e => onErro?.(e as Error)
+  )
+  return unsub
+}
 export function paraUsuarioDaTela (p: PerfilUsuario): User {
   return {
     id: p.id,

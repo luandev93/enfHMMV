@@ -37,6 +37,7 @@ interface DashboardProps {
   onValidateReport: (reportId: string, userId: string) => void;
   onAddScheduleEntry: (entry: Omit<ScheduleEntry, 'id'>) => void;
   onRemoveScheduleEntry: (id: string) => void;
+  onAtualizarEquipe?: () => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
@@ -50,7 +51,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onDeleteReport,
   onValidateReport,
   onAddScheduleEntry,
-  onRemoveScheduleEntry
+  onRemoveScheduleEntry,
+  onAtualizarEquipe
 }) => {
   /* O técnico usa o app para pedir à farmácia e ver aniversários; o registro
      do plantão é responsabilidade do enfermeiro que assina. */
@@ -235,7 +237,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       )}
 
       {activeTab === 'aniversarios' && (
-        <BirthdaysTab users={allUsers} />
+        <BirthdaysTab users={allUsers} onAtualizar={onAtualizarEquipe} />
       )}
 
       {activeTab === 'relatorios' && !soFarmacia && (

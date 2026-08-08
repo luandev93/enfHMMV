@@ -15,7 +15,7 @@ export const VERSAO = '1.6'
 import {
   listarPlantoesRecentes, salvarPlantao, excluirPlantao,
   listarEscalas, salvarEscalas, excluirEscala,
-  listarEquipe, paraUsuarioDaTela
+  listarEquipe, ouvirEquipe, paraUsuarioDaTela
 } from './lib/firebase'
 
 export default function App () {
@@ -104,14 +104,10 @@ function Aplicacao () {
     setCarregandoDados(true)
     setErro('')
     try {
-      const [equipe, plantoes, escalas] = await Promise.all([
-        listarEquipe(),
+      const [plantoes, escalas] = await Promise.all([
         listarPlantoesRecentes(60),
         listarEscalas()
       ])
-      /* Admin entra para conferir e administrar; não aparece como plantonista
-         nem como coautor de relatório. */
-      setUsers(equipe.filter(p => p.enfermagem?.cargo !== 'Admin').map(paraUsuarioDaTela))
       setReports(plantoes)
       setSchedule(escalas)
     } catch (e: any) {
@@ -121,9 +117,33 @@ function Aplicacao () {
     }
   }, [])
 
+  // Listener em tempo real para a equipe (popula o select e os aniversários)
+  useEffect(() => {
+    if (!currentUser) {
+      setUsers([])
+      return
+    }
+    const unsub = ouvirEquipe(
+      equipe => {
+        setUsers(equipe.filter(p => p.enfermagem?.cargo !== 'Admin').map(paraUsuarioDaTela))
+      },
+      e => {
+        console.error('Erro ao ouvir equipe:', e)
+      }
+    )
+    return unsub
+  }, [currentUser])
+
+  const recarregarEquipe = useCallback(() => {
+    if (!currentUser) return
+    listarEquipe()
+      .then(equipe => setUsers(equipe.filter(p => p.enfermagem?.cargo !== 'Admin').map(paraUsuarioDaTela)))
+      .catch(e => console.error('Erro ao recarregar equipe:', e))
+  }, [currentUser])
+
   useEffect(() => {
     if (currentUser) carregar()
-    else { setUsers([]); setReports([]); setSchedule([]) }
+    else { setReports([]); setSchedule([]) }
   }, [currentUser, carregar])
 
   /* ---------------------------------------------------------
@@ -290,14 +310,20 @@ function Aplicacao () {
   if (sessao.precisaTrocarSenha) return <TrocaObrigatoria />
 
   if (!currentUser) {
+    const mensagens: Record<string, string> = {
+      'sem-cadastro': 'Sua conta de acesso existe, mas não foi encontrado um cadastro de funcionário vinculado a ela. Procure a coordenação.',
+      'inativo': 'Sua conta foi desativada. Entre em contato com a coordenação para reativá-la.',
+      'enfermagem-inativa': 'Seu acesso à enfermagem foi desativado. Procure a coordenação para reativação.',
+      'sem-enfermagem': 'Sua conta existe, mas o cargo de enfermagem não foi definido. Procure a coordenação para liberar o acesso ao relatório de plantão.'
+    }
+    const msg = sessao.motivoBloqueio
+      ? mensagens[sessao.motivoBloqueio]
+      : 'Procure a coordenação para liberar o acesso ao relatório de plantão.'
     return (
       <div className="grid min-h-dvh place-items-center bg-slate-100 p-8 text-center">
         <div>
           <h1 className="text-lg font-bold text-slate-900">Acesso ainda não liberado</h1>
-          <p className="mx-auto mt-2 max-w-sm text-sm text-slate-600">
-            Sua conta existe, mas o cargo de enfermagem não foi definido. Procure a
-            coordenação para liberar o acesso ao relatório de plantão.
-          </p>
+          <p className="mx-auto mt-2 max-w-sm text-sm text-slate-600">{msg}</p>
           <button
             onClick={sessao.sair}
             className="mt-5 rounded-lg border-2 border-slate-300 px-5 py-3 font-semibold"
@@ -343,6 +369,7 @@ function Aplicacao () {
               onValidateReport={handleValidateReport}
               onAddScheduleEntry={handleAddScheduleEntry}
               onRemoveScheduleEntry={handleRemoveScheduleEntry}
+              onAtualizarEquipe={recarregarEquipe}
             />
           ) : (
             <ShiftReportForm
