@@ -106,6 +106,18 @@ Para funcionar, configure em **Settings → Secrets and variables → Actions**:
 - `GCP_SA_KEY`: conteúdo JSON completo da chave da service account
   `github-deploy@farmhmmv.iam.gserviceaccount.com` (ou equivalente com permissão
   de deploy no Firebase Hosting).
+- Variáveis/secrets `VITE_FB_*` (pode usar **Secrets** ou **Repository Variables**):
+  - `VITE_FB_API_KEY`
+  - `VITE_FB_AUTH_DOMAIN`
+  - `VITE_FB_PROJECT_ID`
+  - `VITE_FB_STORAGE_BUCKET`
+  - `VITE_FB_MESSAGING_SENDER_ID`
+  - `VITE_FB_APP_ID`
+
+O workflow gera automaticamente o `.env.production` com essas 6 chaves antes do
+build, e falha cedo se alguma estiver ausente (evita deploy com
+`auth/invalid-api-key`).
+Se a mesma chave existir em Secret e Variable, o Secret tem prioridade.
 
 O job usa o ambiente `production`. Se quiser aprovação manual antes de publicar,
 ative as regras de proteção desse ambiente no GitHub.
