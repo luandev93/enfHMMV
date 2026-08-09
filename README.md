@@ -94,6 +94,22 @@ firebase deploy --only hosting:enfermagem
 O app fica em `https://enfhmmv.web.app`, com o estoque intacto em
 `https://farmhmmv.web.app`.
 
+### 4.1 Deploy automático (GitHub Actions)
+
+O repositório inclui o workflow `.github/workflows/deploy-enfermagem.yml`,
+que publica automaticamente no target `hosting:enfermagem` a cada push na
+branch `main` (e também permite execução manual). A execução manual fora da
+`main` falha por proteção explícita.
+
+Para funcionar, configure em **Settings → Secrets and variables → Actions**:
+
+- `GCP_SA_KEY`: conteúdo JSON completo da chave da service account
+  `github-deploy@farmhmmv.iam.gserviceaccount.com` (ou equivalente com permissão
+  de deploy no Firebase Hosting).
+
+O job usa o ambiente `production`. Se quiser aprovação manual antes de publicar,
+ative as regras de proteção desse ambiente no GitHub.
+
 ### 5. Acessos da equipe
 
 Cada pessoa da enfermagem passa a ter um documento em `usuarios/{uid}` com:
