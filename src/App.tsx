@@ -334,7 +334,7 @@ function Aplicacao () {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-100 font-sans text-slate-800 print:min-h-0 print:h-auto print:bg-white">
+    <div className="flex min-h-screen flex-col bg-azul-050 font-sans text-tinta print:min-h-0 print:h-auto print:bg-white">
       <div className="flex flex-1 flex-col print:hidden">
         <Header
           currentUser={currentUser}
@@ -383,7 +383,7 @@ function Aplicacao () {
           )}
         </main>
 
-        <footer className="mt-auto border-t border-slate-700 bg-slate-800 px-4 py-4 text-center text-xs text-slate-400 print:hidden">
+        <footer className="mt-auto border-t border-azul-800 bg-azul-900 px-4 py-4 text-center text-xs text-azul-200 print:hidden">
           <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 sm:flex-row">
             <span>Hospital Municipal Maria Veneri • Relatório da Equipe de Enfermagem</span>
             <span>versão {VERSAO} · {new Date().getFullYear()}</span>

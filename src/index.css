@@ -49,3 +49,29 @@
 }
 
 
+
+@theme {
+  --color-azul-900: #0a2a52;
+  --color-azul-800: #0f3d72;
+  --color-azul-700: #14508f;
+  --color-azul-600: #1668c8;
+  --color-azul-500: #2f83e0;
+  --color-azul-200: #b9d6f5;
+  --color-azul-100: #e2eefb;
+  --color-azul-050: #f3f8fd;
+
+  --color-branco: #ffffff;
+  --color-tinta: #12212f;
+  --color-tinta-fraca: #5b6d80;
+  --color-borda: #d9e5f3;
+  --color-borda-forte: #b7cbe4;
+
+  --color-entrada: #16794f;
+  --color-entrada-bg: #e3f5ec;
+  --color-saida: #b02a1f;
+  --color-saida-bg: #fdeae7;
+  --color-transf: #8a5a09;
+  --color-transf-bg: #fdf1dc;
+  --color-inventario: #5b3fb5;
+  --color-inventario-bg: #eee9fc;
+}
