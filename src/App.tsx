@@ -35,12 +35,12 @@ function TrocaObrigatoria () {
   const [erro, setErro] = useState('')
   const [ocupado, setOcupado] = useState(false)
 
-  const campo = 'w-full rounded-lg border-2 border-slate-300 p-3 text-base focus:border-emerald-600 focus:outline-none'
+  const campo = 'w-full rounded-lg border-2 border-borda-forte p-3 text-base focus:border-azul-600 focus:outline-none'
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-3 p-6">
-      <h1 className="text-lg font-bold text-slate-900">Crie a sua senha</h1>
-      <p className="mb-2 text-sm text-slate-600">
+      <h1 className="text-lg font-bold text-tinta">Crie a sua senha</h1>
+      <p className="mb-2 text-sm text-tinta-fraca">
         {sessao.perfil?.nome}, a senha que você recebeu é provisória e outras pessoas
         podem conhecê-la. Escolha uma senha só sua para continuar.
       </p>
@@ -71,10 +71,10 @@ function TrocaObrigatoria () {
             setOcupado(false)
           }
         }}
-        className="rounded-lg bg-emerald-800 p-4 font-bold text-white disabled:opacity-50"
+        className="rounded-lg bg-azul-800 p-4 font-bold text-white disabled:opacity-50"
       >{ocupado ? 'Salvando…' : 'Salvar e entrar'}</button>
 
-      <button onClick={sessao.sair} className="p-2 text-sm text-slate-500 underline">Sair</button>
+      <button onClick={sessao.sair} className="p-2 text-sm text-tinta-fraca underline">Sair</button>
     </div>
   )
 }
@@ -299,7 +299,7 @@ function Aplicacao () {
 
   if (sessao.carregando) {
     return (
-      <div className="grid min-h-dvh place-items-center bg-slate-100 text-slate-500">
+      <div className="grid min-h-dvh place-items-center bg-azul-100 text-tinta-fraca">
         Entrando…
       </div>
     )
@@ -320,13 +320,13 @@ function Aplicacao () {
       ? mensagens[sessao.motivoBloqueio]
       : 'Procure a coordenação para liberar o acesso ao relatório de plantão.'
     return (
-      <div className="grid min-h-dvh place-items-center bg-slate-100 p-8 text-center">
+      <div className="grid min-h-dvh place-items-center bg-azul-100 p-8 text-center">
         <div>
-          <h1 className="text-lg font-bold text-slate-900">Acesso ainda não liberado</h1>
-          <p className="mx-auto mt-2 max-w-sm text-sm text-slate-600">{msg}</p>
+          <h1 className="text-lg font-bold text-tinta">Acesso ainda não liberado</h1>
+          <p className="mx-auto mt-2 max-w-sm text-sm text-tinta-fraca">{msg}</p>
           <button
             onClick={sessao.sair}
-            className="mt-5 rounded-lg border-2 border-slate-300 px-5 py-3 font-semibold"
+            className="mt-5 rounded-lg border-2 border-borda-forte px-5 py-3 font-semibold"
           >Sair</button>
         </div>
       </div>
@@ -353,7 +353,7 @@ function Aplicacao () {
             </p>
           )}
           {carregandoDados && (
-            <p className="mb-4 text-sm text-slate-500">Carregando plantões…</p>
+            <p className="mb-4 text-sm text-tinta-fraca">Carregando plantões…</p>
           )}
 
           {currentView === 'dashboard' ? (
