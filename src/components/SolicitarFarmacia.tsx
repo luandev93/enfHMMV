@@ -130,16 +130,16 @@ export function SolicitarFarmacia ({ currentUser }: { currentUser: User }) {
 
   if (enviado) {
     return (
-      <div className="rounded-2xl border border-emerald-200 bg-white p-8 text-center">
-        <CheckCircle2 size={44} className="mx-auto text-emerald-600" />
-        <h2 className="mt-3 text-lg font-bold text-slate-900">Solicitação enviada</h2>
-        <p className="mx-auto mt-2 max-w-sm text-sm text-slate-600">
+      <div className="rounded-2xl border border-azul-200 bg-white p-8 text-center">
+        <CheckCircle2 size={44} className="mx-auto text-azul-600" />
+        <h2 className="mt-3 text-lg font-bold text-tinta">Solicitação enviada</h2>
+        <p className="mx-auto mt-2 max-w-sm text-sm text-tinta-fraca">
           A farmácia vai conferir e liberar. O item só sai do estoque depois que
           eles aceitarem — você não precisa acompanhar por aqui.
         </p>
         <button
           onClick={() => setEnviado(false)}
-          className="mt-5 rounded-xl bg-emerald-800 px-6 py-3 font-bold text-white"
+          className="mt-5 rounded-xl bg-azul-800 px-6 py-3 font-bold text-white"
         >Nova solicitação</button>
       </div>
     )
@@ -147,27 +147,27 @@ export function SolicitarFarmacia ({ currentUser }: { currentUser: User }) {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4">
-        <div className="grid h-10 w-10 place-items-center rounded-xl bg-emerald-100 text-emerald-800">
+      <div className="flex items-center gap-3 rounded-2xl border border-borda bg-white p-4">
+        <div className="grid h-10 w-10 place-items-center rounded-xl bg-azul-100 text-azul-800">
           <PackageCheck size={20} />
         </div>
         <div className="min-w-0 flex-1">
-          <h2 className="text-sm font-bold text-slate-900">Solicitar à farmácia</h2>
-          <p className="text-xs text-slate-500">
+          <h2 className="text-sm font-bold text-tinta">Solicitar à farmácia</h2>
+          <p className="text-xs text-tinta-fraca">
             {currentUser.name}{currentUser.coren ? ` · ${currentUser.coren}` : ''}
           </p>
         </div>
       </div>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-4">
-        <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">Setor</label>
+      <section className="rounded-2xl border border-borda bg-white p-4">
+        <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-tinta-fraca">Setor</label>
         <select
           value={setor}
           onChange={e => {
             setSetor(e.target.value)
             try { sessionStorage.setItem(CHAVE_SETOR, e.target.value) } catch (err) { /* sem armazenamento */ }
           }}
-          className="w-full rounded-lg border-2 border-slate-300 p-3 text-base focus:border-emerald-600 focus:outline-none"
+          className="w-full rounded-lg border-2 border-borda-forte p-3 text-base focus:border-azul-600 focus:outline-none"
         >
           <option value="">Escolha o setor…</option>
           {setoresComEstoque.map(s => <option key={s.id} value={s.setor}>{s.setor}</option>)}
@@ -177,11 +177,11 @@ export function SolicitarFarmacia ({ currentUser }: { currentUser: User }) {
           <input
             type="checkbox" checked={paraConsumo}
             onChange={e => setParaConsumo(e.target.checked)}
-            className="mt-0.5 h-5 w-5 shrink-0 accent-emerald-700"
+            className="mt-0.5 h-5 w-5 shrink-0 accent-azul-700"
           />
           <span className="text-sm">
             O item será consumido agora
-            <span className="mt-0.5 block text-xs text-slate-500">
+            <span className="mt-0.5 block text-xs text-tinta-fraca">
               {paraConsumo
                 ? 'A farmácia dá baixa definitiva ao liberar.'
                 : `O item entra no estoque de ${estoqueDoSetor?.nome || 'do setor'} e é baixado quando for usado.`}
@@ -204,14 +204,14 @@ export function SolicitarFarmacia ({ currentUser }: { currentUser: User }) {
         )}
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-4">
-        <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">Item</label>
+      <section className="rounded-2xl border border-borda bg-white p-4">
+        <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-tinta-fraca">Item</label>
 
         {escolhido ? (
-          <div className="flex items-start gap-2 rounded-lg border-2 border-emerald-600 bg-emerald-50 p-3">
+          <div className="flex items-start gap-2 rounded-lg border-2 border-azul-600 bg-azul-050 p-3">
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold leading-tight">{escolhido.descricao}</p>
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-tinta-fraca">
                 {escolhido.codigo} · {escolhido.unidade?.toLowerCase()}
                 {escolhido.controlado && (
                   <span className="ml-2 rounded-full bg-purple-100 px-2 py-0.5 font-bold text-purple-700">
@@ -220,27 +220,27 @@ export function SolicitarFarmacia ({ currentUser }: { currentUser: User }) {
                 )}
               </p>
             </div>
-            <button onClick={() => setEscolhido(null)} className="text-slate-400"><X size={18} /></button>
+            <button onClick={() => setEscolhido(null)} className="text-tinta-fraca"><X size={18} /></button>
           </div>
         ) : (
           <div className="relative">
-            <Search size={18} className="absolute left-3 top-3.5 text-slate-400" />
+            <Search size={18} className="absolute left-3 top-3.5 text-tinta-fraca" />
             <input
               value={busca} onChange={e => setBusca(e.target.value)}
               disabled={carregando}
               placeholder={carregando ? 'Carregando catálogo…' : 'Nome, princípio ativo ou código'}
-              className="w-full rounded-lg border-2 border-slate-300 py-3 pl-10 pr-3 text-base focus:border-emerald-600 focus:outline-none"
+              className="w-full rounded-lg border-2 border-borda-forte py-3 pl-10 pr-3 text-base focus:border-azul-600 focus:outline-none"
             />
             {resultados.length > 0 && (
-              <ul className="absolute z-20 mt-1 max-h-72 w-full overflow-y-auto rounded-lg border border-slate-300 bg-white shadow-lg">
+              <ul className="absolute z-20 mt-1 max-h-72 w-full overflow-y-auto rounded-lg border border-borda-forte bg-white shadow-lg">
                 {resultados.map(i => (
                   <li key={i.id}>
                     <button
                       onClick={() => { setEscolhido(i); setBusca(''); setTimeout(() => campoQtd.current?.focus(), 60) }}
-                      className="block w-full border-b border-slate-100 p-3 text-left hover:bg-slate-50"
+                      className="block w-full border-b border-borda p-3 text-left hover:bg-azul-050"
                     >
                       <p className="text-sm font-semibold leading-tight">{i.descricao}</p>
-                      <p className="mt-0.5 text-xs text-slate-500">
+                      <p className="mt-0.5 text-xs text-tinta-fraca">
                         {i.codigo}
                         {i.controlado && <span className="ml-2 font-bold text-purple-700">controlado</span>}
                       </p>
@@ -255,37 +255,37 @@ export function SolicitarFarmacia ({ currentUser }: { currentUser: User }) {
         {escolhido && (
           <div className="mt-3 flex items-end gap-2">
             <div className="flex-1">
-              <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
+              <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-tinta-fraca">
                 Quantidade em {escolhido.unidade?.toLowerCase()}
               </label>
               <input
                 ref={campoQtd} value={qtd} inputMode="numeric"
                 onChange={e => setQtd(e.target.value.replace(/\D/g, ''))}
                 onKeyDown={e => { if (e.key === 'Enter') adicionar() }}
-                className="w-full rounded-lg border-2 border-slate-300 p-3 text-base tabular-nums focus:border-emerald-600 focus:outline-none"
+                className="w-full rounded-lg border-2 border-borda-forte p-3 text-base tabular-nums focus:border-azul-600 focus:outline-none"
               />
             </div>
             <button
               onClick={adicionar}
-              className="flex items-center gap-1 rounded-lg bg-emerald-800 px-5 py-3 font-semibold text-white"
+              className="flex items-center gap-1 rounded-lg bg-azul-800 px-5 py-3 font-semibold text-white"
             ><Plus size={18} /> Incluir</button>
           </div>
         )}
       </section>
 
       {linhas.length > 0 && (
-        <section className="space-y-2 rounded-2xl border border-slate-200 bg-white p-4">
-          <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500">
+        <section className="space-y-2 rounded-2xl border border-borda bg-white p-4">
+          <h3 className="text-xs font-bold uppercase tracking-wide text-tinta-fraca">
             Itens da solicitação ({linhas.length})
           </h3>
           {linhas.map(l => (
-            <div key={l.itemId} className="flex items-center gap-3 rounded-lg border border-slate-200 p-3">
+            <div key={l.itemId} className="flex items-center gap-3 rounded-lg border border-borda p-3">
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold">{l.descricao}</p>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-tinta-fraca">
                   {l.codigo}
                   {l.controlado && <span className="ml-2 font-bold text-purple-700">controle especial</span>}
-                  {l.consumoInterno && <span className="ml-2 text-slate-500">uso coletivo</span>}
+                  {l.consumoInterno && <span className="ml-2 text-tinta-fraca">uso coletivo</span>}
                   {!l.controlado && l.exigePaciente && (
                     <span className="ml-2 font-bold text-amber-700">exige paciente</span>
                   )}
@@ -294,7 +294,7 @@ export function SolicitarFarmacia ({ currentUser }: { currentUser: User }) {
               <span className="text-base font-bold tabular-nums">{l.qtdSolicitada}</span>
               <button
                 onClick={() => setLinhas(a => a.filter(x => x.itemId !== l.itemId))}
-                className="rounded p-2 text-slate-400 hover:bg-slate-100"
+                className="rounded p-2 text-tinta-fraca hover:bg-azul-100"
               ><Trash2 size={16} /></button>
             </div>
           ))}
@@ -302,35 +302,35 @@ export function SolicitarFarmacia ({ currentUser }: { currentUser: User }) {
       )}
 
       {paraConsumo && !soUsoColetivo && (
-      <section className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4">
-        <p className="text-xs text-slate-500">
+      <section className="space-y-3 rounded-2xl border border-borda bg-white p-4">
+        <p className="text-xs text-tinta-fraca">
           {precisaIdentificar
             ? 'Há item que só é dispensado com paciente e prescritor identificados.'
             : 'Preenchimento opcional.'}
         </p>
 
         <div>
-          <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
-            Paciente {precisaIdentificar && <span className="text-red-600">*</span>}
+          <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-tinta-fraca">
+            Paciente {precisaIdentificar && <span className="text-saida">*</span>}
           </label>
           <input
             value={pacienteNome} onChange={e => setPacienteNome(e.target.value)}
-            className="w-full rounded-lg border-2 border-slate-300 p-3 text-base focus:border-emerald-600 focus:outline-none"
+            className="w-full rounded-lg border-2 border-borda-forte p-3 text-base focus:border-azul-600 focus:outline-none"
           />
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">CPF</label>
+          <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-tinta-fraca">CPF</label>
           <input
             value={pacienteCPF} inputMode="numeric" placeholder="000.000.000-00"
             onChange={e => setPacienteCPF(mascaraCPF(e.target.value))}
-            className="w-full rounded-lg border-2 border-slate-300 p-3 text-base tabular-nums focus:border-emerald-600 focus:outline-none"
+            className="w-full rounded-lg border-2 border-borda-forte p-3 text-base tabular-nums focus:border-azul-600 focus:outline-none"
           />
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
-            Médico prescritor {precisaIdentificar && <span className="text-red-600">*</span>}
+          <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-tinta-fraca">
+            Médico prescritor {precisaIdentificar && <span className="text-saida">*</span>}
           </label>
           <select
             value={prescritorNome}
@@ -339,7 +339,7 @@ export function SolicitarFarmacia ({ currentUser }: { currentUser: User }) {
               setPrescritorNome(e.target.value)
               setPrescritorConselho(p ? registroDe(p) : '')
             }}
-            className="w-full rounded-lg border-2 border-slate-300 p-3 text-base focus:border-emerald-600 focus:outline-none"
+            className="w-full rounded-lg border-2 border-borda-forte p-3 text-base focus:border-azul-600 focus:outline-none"
           >
             <option value="">
               {prescritores.length ? 'Selecionar prescritor…' : 'Nenhum prescritor cadastrado'}
@@ -351,31 +351,31 @@ export function SolicitarFarmacia ({ currentUser }: { currentUser: User }) {
             ))}
           </select>
           {prescritorConselho && (
-            <p className="mt-1 text-xs text-slate-500">{prescritorConselho}</p>
+            <p className="mt-1 text-xs text-tinta-fraca">{prescritorConselho}</p>
           )}
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
+          <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-tinta-fraca">
             Outros detalhes
           </label>
           <textarea
             value={observacao} onChange={e => setObservacao(e.target.value)} rows={2}
             placeholder="Leito, urgência, o que for útil para a farmácia"
-            className="w-full rounded-lg border-2 border-slate-300 p-3 text-base focus:border-emerald-600 focus:outline-none"
+            className="w-full rounded-lg border-2 border-borda-forte p-3 text-base focus:border-azul-600 focus:outline-none"
           />
         </div>
       </section>
       )}
 
       {erro && (
-        <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{erro}</p>
+        <p className="rounded-lg border border-saida bg-saida-bg p-3 text-sm text-saida">{erro}</p>
       )}
 
       <button
         onClick={enviar}
         disabled={enviando || linhas.length === 0}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-800 p-4 text-base font-bold text-white disabled:opacity-40"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-azul-800 p-4 text-base font-bold text-white disabled:opacity-40"
       >
         <Send size={18} />
         {enviando ? 'Enviando…' : `Enviar solicitação${linhas.length ? ` (${linhas.length})` : ''}`}

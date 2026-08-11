@@ -336,7 +336,7 @@ export const ShiftReportForm: React.FC<ShiftReportFormProps> = ({
             onClick={(e) => handleSave(e, true)}
             className="px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 active:scale-95"
           >
-            <FileEdit className="w-4 h-4 text-slate-300" />
+            <FileEdit className="w-4 h-4 text-tinta-fraca" />
             Salvar Rascunho
           </button>
 
@@ -744,7 +744,7 @@ export const ShiftReportForm: React.FC<ShiftReportFormProps> = ({
               className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
                 activeSector === sec
                   ? 'bg-emerald-800 text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  : 'bg-slate-100 text-slate-700 hover:bg-azul-200'
               }`}
             >
               {sec}
@@ -773,7 +773,7 @@ export const ShiftReportForm: React.FC<ShiftReportFormProps> = ({
                     className={`px-2 py-0.5 rounded-md text-[11px] font-bold border transition-all ${
                       item.status === 'conforme'
                         ? 'bg-emerald-600 text-white border-emerald-700'
-                        : 'bg-white text-slate-600 border-slate-300'
+                        : 'bg-white text-tinta-fraca border-slate-300'
                     }`}
                   >
                     ✅ Conforme
@@ -784,7 +784,7 @@ export const ShiftReportForm: React.FC<ShiftReportFormProps> = ({
                     className={`px-2 py-0.5 rounded-md text-[11px] font-bold border transition-all ${
                       item.status === 'alerta'
                         ? 'bg-amber-500 text-amber-950 border-amber-600'
-                        : 'bg-white text-slate-600 border-slate-300'
+                        : 'bg-white text-tinta-fraca border-slate-300'
                     }`}
                   >
                     ⚠️ Alerta
@@ -794,8 +794,8 @@ export const ShiftReportForm: React.FC<ShiftReportFormProps> = ({
                     onClick={() => handleStatusChange(item.id, 'nao_conforme')}
                     className={`px-2 py-0.5 rounded-md text-[11px] font-bold border transition-all ${
                       item.status === 'nao_conforme'
-                        ? 'bg-rose-600 text-white border-rose-700'
-                        : 'bg-white text-slate-600 border-slate-300'
+                        ? 'bg-saida text-white border-saida'
+                        : 'bg-white text-tinta-fraca border-slate-300'
                     }`}
                   >
                     ❌ Não Conf.
@@ -871,7 +871,7 @@ export const ShiftReportForm: React.FC<ShiftReportFormProps> = ({
 
       {/* Caixa de Diálogo (Modal) para Complementar Informações */}
       {showComplementModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-azul-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-lg w-full p-5 border border-slate-200 shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-slate-100">
               <div className="flex items-center gap-2">
@@ -883,7 +883,7 @@ export const ShiftReportForm: React.FC<ShiftReportFormProps> = ({
               <button
                 type="button"
                 onClick={() => setShowComplementModal(false)}
-                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+                className="p-1 text-slate-400 hover:text-tinta-fraca rounded-lg"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -943,7 +943,7 @@ export const ShiftReportForm: React.FC<ShiftReportFormProps> = ({
           onClick={(e) => handleSave(e, true)}
           className="px-4 py-2.5 bg-slate-700 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 active:scale-95"
         >
-          <FileEdit className="w-4 h-4 text-slate-300" />
+          <FileEdit className="w-4 h-4 text-tinta-fraca" />
           Salvar Rascunho
         </button>
 

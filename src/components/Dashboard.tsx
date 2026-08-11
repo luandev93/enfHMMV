@@ -161,14 +161,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
   return (
     <div className="space-y-5">
       {/* Top Navigation Tabs */}
-      <div className="bg-white p-2 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-3">
+      <div className="bg-white p-2 rounded-2xl border border-borda shadow-xs flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-1 overflow-x-auto scrollbar-none">
           <button
             onClick={() => setActiveTab('farmacia')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
               activeTab === 'farmacia'
-                ? 'bg-emerald-800 text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-100'
+                ? 'bg-azul-800 text-white shadow-xs'
+                : 'text-tinta-fraca hover:bg-azul-100'
             }`}
           >
             <PackageCheck className="w-4 h-4" />
@@ -179,8 +179,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
             onClick={() => setActiveTab('relatorios')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
               activeTab === 'relatorios'
-                ? 'bg-emerald-800 text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-100'
+                ? 'bg-azul-800 text-white shadow-xs'
+                : 'text-tinta-fraca hover:bg-azul-100'
             }`}
           >
             <FileText className="w-4 h-4" />
@@ -191,8 +191,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
             onClick={() => setActiveTab('escala')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
               activeTab === 'escala'
-                ? 'bg-emerald-800 text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-100'
+                ? 'bg-azul-800 text-white shadow-xs'
+                : 'text-tinta-fraca hover:bg-azul-100'
             }`}
           >
             <Calendar className="w-4 h-4" />
@@ -203,8 +203,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
             onClick={() => setActiveTab('aniversarios')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
               activeTab === 'aniversarios'
-                ? 'bg-emerald-800 text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-100'
+                ? 'bg-azul-800 text-white shadow-xs'
+                : 'text-tinta-fraca hover:bg-azul-100'
             }`}
           >
             <Cake className="w-4 h-4" />
@@ -214,9 +214,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         {!soFarmacia && <button
           onClick={onNewReport}
-          className="bg-emerald-800 hover:bg-emerald-900 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-xs transition-all flex items-center gap-1.5 active:scale-95 shrink-0"
+          className="bg-azul-800 hover:bg-azul-900 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-xs transition-all flex items-center gap-1.5 active:scale-95 shrink-0"
         >
-          <Plus className="w-4 h-4 text-emerald-300" />
+          <Plus className="w-4 h-4 text-azul-200" />
           <span>Adicionar novo relatório</span>
         </button>}
       </div>
@@ -243,22 +243,22 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {activeTab === 'relatorios' && !soFarmacia && (
         <div className="space-y-4">
           {/* Minimalist UX Filter Bar */}
-          <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+          <div className="bg-white p-4 rounded-2xl border border-borda shadow-xs space-y-3">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
               {/* Search Bar */}
               <div className="relative w-full sm:w-80">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-2.5" />
+                <Search className="w-4 h-4 text-tinta-fraca absolute left-3.5 top-2.5" />
                 <input
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Buscar por profissional, texto, data..."
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-9 pr-8 py-2 text-xs text-slate-800 outline-none focus:bg-white focus:ring-2 focus:ring-emerald-500 font-medium"
+                  className="w-full bg-azul-050 border border-borda-forte rounded-xl pl-9 pr-8 py-2 text-xs text-tinta outline-none focus:bg-white focus:ring-2 focus:ring-azul-500 font-medium"
                 />
                 {searchTerm && (
                   <button
                     onClick={() => setSearchTerm('')}
-                    className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600"
+                    className="absolute right-2.5 top-2.5 text-tinta-fraca hover:text-tinta"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -271,7 +271,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <select
                   value={selectedShift}
                   onChange={(e) => setSelectedShift(e.target.value)}
-                  className="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-700 outline-none font-medium hover:bg-slate-100"
+                  className="bg-azul-050 border border-borda-forte rounded-xl px-3 py-1.5 text-xs text-tinta outline-none font-medium hover:bg-azul-100"
                 >
                   <option value="todos">Turno: Todos</option>
                   <option value="diurno">Diurno (07-19h)</option>
@@ -282,7 +282,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <select
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-700 outline-none font-medium hover:bg-slate-100"
+                  className="bg-azul-050 border border-borda-forte rounded-xl px-3 py-1.5 text-xs text-tinta outline-none font-medium hover:bg-azul-100"
                 >
                   <option value="todos">Status: Todos</option>
                   <option value="concluido">Concluído</option>
@@ -294,7 +294,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <select
                   value={selectedPeriod}
                   onChange={(e) => setSelectedPeriod(e.target.value)}
-                  className="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-700 outline-none font-medium hover:bg-slate-100"
+                  className="bg-azul-050 border border-borda-forte rounded-xl px-3 py-1.5 text-xs text-tinta outline-none font-medium hover:bg-azul-100"
                 >
                   <option value="todos">Período: Todos</option>
                   <option value="hoje">Hoje</option>
@@ -306,7 +306,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as 'recentes' | 'antigos')}
-                  className="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-700 outline-none font-medium hover:bg-slate-100"
+                  className="bg-azul-050 border border-borda-forte rounded-xl px-3 py-1.5 text-xs text-tinta outline-none font-medium hover:bg-azul-100"
                 >
                   <option value="recentes">Mais Recentes</option>
                   <option value="antigos">Mais Antigos</option>
@@ -315,7 +315,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 {hasActiveFilters && (
                   <button
                     onClick={handleResetFilters}
-                    className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition-all flex items-center gap-1"
+                    className="px-3 py-1.5 bg-saida-bg hover:bg-saida-bg text-saida border border-saida rounded-xl text-xs font-bold transition-all flex items-center gap-1"
                   >
                     <X className="w-3.5 h-3.5" />
                     <span>Limpar</span>
@@ -325,12 +325,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
 
             {/* Results counter indicator */}
-            <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-100">
+            <div className="flex items-center justify-between text-[11px] text-tinta-fraca pt-1 border-t border-borda">
               <span>
-                Exibindo <strong className="text-slate-800">{filteredReports.length}</strong> de {reports.length} relatório(s) registrados
+                Exibindo <strong className="text-tinta">{filteredReports.length}</strong> de {reports.length} relatório(s) registrados
               </span>
               {hasActiveFilters && (
-                <span className="text-emerald-800 font-semibold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                <span className="text-azul-800 font-semibold bg-azul-050 px-2 py-0.5 rounded-md border border-azul-200">
                   Filtros Ativos
                 </span>
               )}
@@ -339,12 +339,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           {/* Reports List */}
           {filteredReports.length === 0 ? (
-            <div className="bg-white rounded-2xl p-10 text-center border border-slate-200 shadow-xs space-y-2">
-              <FileText className="w-10 h-10 text-slate-300 mx-auto" />
-              <p className="text-sm font-bold text-slate-700">
+            <div className="bg-white rounded-2xl p-10 text-center border border-borda shadow-xs space-y-2">
+              <FileText className="w-10 h-10 text-tinta-fraca mx-auto" />
+              <p className="text-sm font-bold text-tinta">
                 {hasActiveFilters ? 'Nenhum relatório encontrado para esses filtros' : 'Nenhum relatório registrado ainda'}
               </p>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+              <p className="text-xs text-tinta-fraca max-w-sm mx-auto">
                 {hasActiveFilters
                   ? 'Tente alterar os termos de busca ou remover os filtros aplicados.'
                   : 'Clique no botão "Adicionar novo relatório" para registrar o primeiro plantão.'}
@@ -352,7 +352,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               {hasActiveFilters && (
                 <button
                   onClick={handleResetFilters}
-                  className="mt-2 text-xs font-bold text-emerald-800 hover:underline inline-block"
+                  className="mt-2 text-xs font-bold text-azul-800 hover:underline inline-block"
                 >
                   Limpar Filtros
                 </button>
@@ -375,30 +375,30 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <div
                   key={rep.id}
                   onClick={() => onOpenReportDetail(rep)}
-                  className="bg-white rounded-2xl border border-slate-200 hover:border-emerald-400 hover:shadow-md p-4 transition-all space-y-3 cursor-pointer group"
+                  className="bg-white rounded-2xl border border-borda hover:border-azul-500 hover:shadow-md p-4 transition-all space-y-3 cursor-pointer group"
                 >
                   {/* Top Status Badges Row - Matches user sketch layout */}
-                  <div className="flex flex-col gap-2.5 pb-2.5 border-b border-slate-100">
+                  <div className="flex flex-col gap-2.5 pb-2.5 border-b border-borda">
                     <div className="flex flex-wrap items-stretch gap-2">
                       {/* Box 1: Visualizações ✓✓ / Count */}
                       <div
-                        className="bg-sky-50 border border-sky-300 rounded-xl px-2.5 py-1 flex flex-col items-center justify-center min-w-[42px] shrink-0"
+                        className="bg-azul-050 border border-azul-200 rounded-xl px-2.5 py-1 flex flex-col items-center justify-center min-w-[42px] shrink-0"
                         title={hasViews ? `Visualizado por ${rep.viewReceipts?.length} pessoa(s)` : 'Ainda não registrado'}
                       >
-                        <span className="text-sky-600 font-mono font-black text-xs leading-none">✓✓</span>
-                        <span className="text-sky-800 font-mono font-extrabold text-[11px] leading-tight mt-0.5">
+                        <span className="text-azul-600 font-mono font-black text-xs leading-none">✓✓</span>
+                        <span className="text-azul-800 font-mono font-extrabold text-[11px] leading-tight mt-0.5">
                           {rep.viewReceipts?.length || 1}
                         </span>
                       </div>
 
                       {/* Box 2: Data (ex: 23/07/2026) */}
-                      <div className="bg-white border border-slate-300 rounded-xl px-3 py-1.5 flex items-center justify-center font-extrabold text-slate-900 text-xs sm:text-sm shrink-0 shadow-2xs">
+                      <div className="bg-white border border-borda-forte rounded-xl px-3 py-1.5 flex items-center justify-center font-extrabold text-tinta text-xs sm:text-sm shrink-0 shadow-2xs">
                         {dateFmt}
                       </div>
 
                       {/* Box 3: Dia da Semana (ex: QUINTA-FEIRA) */}
                       {dayName && (
-                        <div className="bg-emerald-50 border border-emerald-300 text-emerald-950 rounded-xl px-3 py-1.5 flex items-center justify-center font-extrabold text-xs uppercase tracking-wide shrink-0">
+                        <div className="bg-entrada-bg border border-entrada text-entrada rounded-xl px-3 py-1.5 flex items-center justify-center font-extrabold text-xs uppercase tracking-wide shrink-0">
                           {dayName}
                         </div>
                       )}
@@ -407,7 +407,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       <div
                         className={`border rounded-xl px-3 py-1.5 flex items-center justify-center font-extrabold text-xs uppercase tracking-wide shrink-0 ${
                           rep.shift === 'diurno'
-                            ? 'bg-emerald-100/90 border-emerald-400 text-emerald-950'
+                            ? 'bg-entrada-bg/90 border-entrada text-entrada'
                             : 'bg-indigo-100/90 border-indigo-300 text-indigo-950'
                         }`}
                       >
@@ -416,36 +416,36 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
                       {/* Box 5: Visto da Coordenadora */}
                       {rep.coordinatorConference ? (
-                        <div className="bg-emerald-50 border-2 border-emerald-500 text-emerald-950 rounded-xl px-3 py-1.5 flex items-center gap-1.5 font-black text-xs uppercase tracking-wide shrink-0 shadow-2xs">
+                        <div className="bg-entrada-bg border-2 border-entrada text-entrada rounded-xl px-3 py-1.5 flex items-center gap-1.5 font-black text-xs uppercase tracking-wide shrink-0 shadow-2xs">
                           <span>VISTO DA COORDENADORA</span>
-                          <span className="text-emerald-700 text-sm font-black">✓</span>
+                          <span className="text-entrada text-sm font-black">✓</span>
                         </div>
                       ) : (
-                        <div className="bg-slate-50 border border-dashed border-slate-300 text-slate-500 rounded-xl px-2.5 py-1.5 flex items-center gap-1 font-semibold text-[11px] shrink-0">
-                          <Clock className="w-3.5 h-3.5 text-slate-400" />
+                        <div className="bg-azul-050 border border-dashed border-borda-forte text-tinta-fraca rounded-xl px-2.5 py-1.5 flex items-center gap-1 font-semibold text-[11px] shrink-0">
+                          <Clock className="w-3.5 h-3.5 text-tinta-fraca" />
                           <span>Pendente Visto Coordenação</span>
                         </div>
                       )}
 
                       {/* Optional Status Alert Badges */}
                       {alertsCount > 0 && (
-                        <div className="bg-rose-50 border border-rose-200 text-rose-800 rounded-xl px-2.5 py-1.5 flex items-center gap-1 font-bold text-[11px] shrink-0">
-                          <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
+                        <div className="bg-saida-bg border border-saida text-saida rounded-xl px-2.5 py-1.5 flex items-center gap-1 font-bold text-[11px] shrink-0">
+                          <AlertTriangle className="w-3.5 h-3.5 text-saida" />
                           <span>{alertsCount} Alerta(s)</span>
                         </div>
                       )}
                     </div>
 
-                    <div className="flex items-center justify-between text-xs text-slate-500 font-medium px-0.5">
+                    <div className="flex items-center justify-between text-xs text-tinta-fraca font-medium px-0.5">
                       <div>
-                        Autor: <span className="font-bold text-slate-800">{rep.authorName}</span> ({rep.authorRole})
+                        Autor: <span className="font-bold text-tinta">{rep.authorName}</span> ({rep.authorRole})
                       </div>
                       {rep.status === 'rascunho' ? (
                         <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
                           📝 Rascunho
                         </span>
                       ) : (
-                        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                        <span className="text-[10px] font-bold text-entrada bg-entrada-bg px-2 py-0.5 rounded border border-entrada">
                           ✓ Concluído
                         </span>
                       )}
@@ -453,9 +453,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   </div>
 
                   {/* Recebimento Excerpt */}
-                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs">
-                    <div className="font-bold text-slate-700 mb-0.5">Recebimento do Plantão:</div>
-                    <p className="text-slate-700 line-clamp-2 italic">
+                  <div className="bg-azul-050 p-3 rounded-xl border border-borda text-xs">
+                    <div className="font-bold text-tinta mb-0.5">Recebimento do Plantão:</div>
+                    <p className="text-tinta line-clamp-2 italic">
                       "{rep.recebimentoPlantao || 'Sem observações escritas.'}"
                     </p>
                   </div>
@@ -466,16 +466,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       {/* Quick WhatsApp Share */}
                       <button
                         onClick={(e) => handleQuickWhatsAppShare(rep, e)}
-                        className="p-1.5 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors flex items-center gap-1 text-xs font-semibold"
+                        className="p-1.5 text-tinta-fraca hover:text-entrada hover:bg-entrada-bg rounded-lg transition-colors flex items-center gap-1 text-xs font-semibold"
                         title="Copiar texto simples para WhatsApp"
                       >
                         {copiedId === rep.id ? (
-                          <span className="text-emerald-700 font-bold flex items-center gap-1">
+                          <span className="text-entrada font-bold flex items-center gap-1">
                             <Check className="w-3.5 h-3.5" /> Copiado!
                           </span>
                         ) : (
                           <>
-                            <Share2 className="w-4 h-4 text-emerald-600" />
+                            <Share2 className="w-4 h-4 text-entrada" />
                             <span className="hidden sm:inline">WhatsApp</span>
                           </>
                         )}
@@ -488,7 +488,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                             e.stopPropagation();
                             onEditReport(rep);
                           }}
-                          className="p-1.5 text-slate-500 hover:text-emerald-800 hover:bg-emerald-50 rounded-lg transition-colors flex items-center gap-1 text-xs font-semibold"
+                          className="p-1.5 text-tinta-fraca hover:text-azul-800 hover:bg-azul-050 rounded-lg transition-colors flex items-center gap-1 text-xs font-semibold"
                           title="Editar Relatório"
                         >
                           <Edit3 className="w-4 h-4" />
@@ -505,7 +505,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                               onDeleteReport(rep.id);
                             }
                           }}
-                          className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors flex items-center gap-1 text-xs font-semibold"
+                          className="p-1.5 text-saida hover:text-saida hover:bg-saida-bg rounded-lg transition-colors flex items-center gap-1 text-xs font-semibold"
                           title="Apagar Relatório (Apenas Admin)"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -518,7 +518,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                           e.stopPropagation();
                           onOpenReportDetail(rep);
                         }}
-                        className="bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-xs transition-all active:scale-95"
+                        className="bg-azul-800 hover:bg-azul-900 text-white font-bold text-xs px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-xs transition-all active:scale-95"
                       >
                         <Eye className="w-3.5 h-3.5" />
                         Visualizar

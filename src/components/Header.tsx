@@ -26,18 +26,18 @@ export const Header: React.FC<HeaderProps> = ({
   void isAdmin;
 
   return (
-    <header className="bg-emerald-800 text-white shadow-md sticky top-0 z-40">
+    <header className="bg-azul-800 text-white shadow-md sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 py-3 sm:px-6 flex flex-wrap items-center justify-between gap-3">
         {/* Simple Header mentioning Relatório da Equipe de Enfermagem */}
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-full bg-emerald-900 border border-emerald-400 flex items-center justify-center text-white shadow-inner shrink-0">
-            <Activity className="w-5 h-5 text-emerald-300" />
+          <div className="w-9 h-9 rounded-full bg-azul-900 border border-azul-500 flex items-center justify-center text-white shadow-inner shrink-0">
+            <Activity className="w-5 h-5 text-azul-200" />
           </div>
           <div>
             <h1 className="text-base sm:text-lg font-bold tracking-tight leading-tight">
               Relatório da Equipe de Enfermagem
             </h1>
-            <p className="text-[11px] text-emerald-200 font-medium flex items-center gap-1.5 flex-wrap">
+            <p className="text-[11px] text-azul-200 font-medium flex items-center gap-1.5 flex-wrap">
               <span>Hospital Municipal Maria Veneri</span>
             </p>
           </div>
@@ -49,10 +49,10 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Button: Adicionar novo relatório */}
             {!soFarmacia && <button
               onClick={onNewReport}
-              className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-xl text-xs font-semibold shadow-xs transition-all border border-emerald-400/40 active:scale-95"
+              className="flex items-center gap-1.5 bg-azul-600 hover:bg-azul-500 text-white px-3 py-1.5 rounded-xl text-xs font-semibold shadow-xs transition-all border border-azul-500/40 active:scale-95"
               title="Adicionar novo relatório"
             >
-              <PlusCircle className="w-4 h-4 text-emerald-200" />
+              <PlusCircle className="w-4 h-4 text-azul-200" />
               <span>Adicionar novo relatório</span>
             </button>}
 
@@ -74,7 +74,7 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Staff Management */}
             <button
               onClick={onOpenUserManagement}
-              className="flex items-center gap-1 bg-emerald-900/60 hover:bg-emerald-900 text-emerald-100 px-2.5 py-1.5 rounded-xl text-xs font-medium border border-emerald-700/60 transition-colors"
+              className="flex items-center gap-1 bg-azul-900/60 hover:bg-azul-900 text-azul-100 px-2.5 py-1.5 rounded-xl text-xs font-medium border border-azul-700/60 transition-colors"
               title="Equipe"
             >
               <Users className="w-4 h-4" />
@@ -84,24 +84,24 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Change password button */}
             <button
               onClick={onOpenChangePassword}
-              className="p-1.5 bg-emerald-900/60 hover:bg-emerald-900 text-emerald-100 rounded-xl border border-emerald-700/60 transition-colors"
+              className="p-1.5 bg-azul-900/60 hover:bg-azul-900 text-azul-100 rounded-xl border border-azul-700/60 transition-colors"
               title="Alterar Senha"
             >
-              <KeyRound className="w-4 h-4 text-emerald-300" />
+              <KeyRound className="w-4 h-4 text-azul-200" />
             </button>
 
             {/* Current user badge */}
-            <div className="hidden sm:flex items-center gap-2 bg-emerald-900/80 px-2.5 py-1 rounded-xl border border-emerald-700/80 text-xs">
+            <div className="hidden sm:flex items-center gap-2 bg-azul-900/80 px-2.5 py-1 rounded-xl border border-azul-700/80 text-xs">
               <div className="text-left">
                 <div className="font-semibold text-white leading-tight">{currentUser.name}</div>
-                <div className="text-[10px] text-emerald-200 leading-tight">{currentUser.role}</div>
+                <div className="text-[10px] text-azul-200 leading-tight">{currentUser.role}</div>
               </div>
             </div>
 
             {/* Logout Button */}
             <button
               onClick={onLogout}
-              className="p-1.5 text-emerald-200 hover:text-white hover:bg-emerald-700 rounded-xl transition-colors"
+              className="p-1.5 text-azul-200 hover:text-white hover:bg-azul-700 rounded-xl transition-colors"
               title="Sair"
             >
               <LogOut className="w-4 h-4" />

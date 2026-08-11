@@ -71,23 +71,23 @@ export const BirthdaysTab: React.FC<BirthdaysTabProps> = ({ users, onAtualizar }
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="bg-white border border-borda rounded-2xl p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <span className="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+          <span className="text-[11px] font-bold text-azul-800 bg-azul-050 px-2.5 py-0.5 rounded-full border border-azul-200">
             Agenda de Aniversários
           </span>
-          <h2 className="text-xl font-bold text-slate-900 mt-1 flex items-center gap-2">
-            <Cake className="w-5 h-5 text-emerald-600" />
+          <h2 className="text-xl font-bold text-tinta mt-1 flex items-center gap-2">
+            <Cake className="w-5 h-5 text-azul-600" />
             Aniversariantes da Equipe
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-tinta-fraca mt-0.5">
             Acompanhe e celebre a data de nascimento dos profissionais de enfermagem.
           </p>
           {onAtualizar && (
             <button
               type="button"
               onClick={onAtualizar}
-              className="mt-2 flex items-center gap-1 text-[11px] text-emerald-700 hover:text-emerald-900 font-semibold"
+              className="mt-2 flex items-center gap-1 text-[11px] text-azul-700 hover:text-azul-900 font-semibold"
               title="Atualizar lista de aniversariantes"
             >
               <RefreshCw className="w-3 h-3" />
@@ -114,15 +114,15 @@ export const BirthdaysTab: React.FC<BirthdaysTabProps> = ({ users, onAtualizar }
       </div>
 
       {/* Filter controls */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="bg-white border border-borda rounded-2xl p-4 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="relative w-full sm:w-72">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+          <Search className="w-4 h-4 text-tinta-fraca absolute left-3 top-2.5" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Buscar profissional..."
-            className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500"
+            className="w-full bg-azul-050 border border-borda-forte rounded-xl pl-9 pr-3 py-1.5 text-xs text-tinta outline-none focus:ring-2 focus:ring-azul-500"
           />
         </div>
 
@@ -132,8 +132,8 @@ export const BirthdaysTab: React.FC<BirthdaysTabProps> = ({ users, onAtualizar }
             onClick={() => setSelectedMonth(0)}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
               selectedMonth === 0
-                ? 'bg-slate-900 text-white'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                ? 'bg-azul-900 text-white'
+                : 'bg-azul-100 text-tinta-fraca hover:bg-azul-200'
             }`}
           >
             Todos os Meses
@@ -145,8 +145,8 @@ export const BirthdaysTab: React.FC<BirthdaysTabProps> = ({ users, onAtualizar }
               onClick={() => setSelectedMonth(m.value)}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                 selectedMonth === m.value
-                  ? 'bg-emerald-800 text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? 'bg-azul-800 text-white shadow-xs'
+                  : 'bg-azul-100 text-tinta-fraca hover:bg-azul-200'
               }`}
             >
               {m.name}
@@ -157,10 +157,10 @@ export const BirthdaysTab: React.FC<BirthdaysTabProps> = ({ users, onAtualizar }
 
       {/* Birthdays Grid */}
       {filteredUsers.length === 0 ? (
-        <div className="bg-white rounded-2xl p-10 text-center border border-slate-200">
-          <Cake className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-          <p className="text-xs font-bold text-slate-700">Nenhum aniversariante encontrado neste mês</p>
-          <p className="text-[11px] text-slate-500 mt-1">
+        <div className="bg-white rounded-2xl p-10 text-center border border-borda">
+          <Cake className="w-10 h-10 text-tinta-fraca mx-auto mb-2" />
+          <p className="text-xs font-bold text-tinta">Nenhum aniversariante encontrado neste mês</p>
+          <p className="text-[11px] text-tinta-fraca mt-1">
             Selecione outro mês no filtro superior.
           </p>
         </div>
@@ -177,11 +177,11 @@ export const BirthdaysTab: React.FC<BirthdaysTabProps> = ({ users, onAtualizar }
                 className={`p-4 rounded-2xl border transition-all ${
                   u.isToday
                     ? 'bg-gradient-to-br from-pink-50 to-rose-50 border-pink-300 shadow-md ring-2 ring-pink-400'
-                    : 'bg-white border-slate-200 hover:border-emerald-300 shadow-xs'
+                    : 'bg-white border-borda hover:border-azul-200 shadow-xs'
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-800 font-extrabold text-sm shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-azul-050 border border-azul-200 flex items-center justify-center text-azul-800 font-extrabold text-sm shrink-0">
                     {dayFormatted}
                   </div>
                   {u.isToday && (
@@ -192,9 +192,9 @@ export const BirthdaysTab: React.FC<BirthdaysTabProps> = ({ users, onAtualizar }
                 </div>
 
                 <div className="mt-3">
-                  <h4 className="text-sm font-bold text-slate-900 leading-snug">{u.name}</h4>
-                  <div className="text-[11px] text-slate-500 font-medium mt-0.5">{u.role}</div>
-                  <div className="text-[11px] text-emerald-700 font-semibold mt-2 flex items-center gap-1">
+                  <h4 className="text-sm font-bold text-tinta leading-snug">{u.name}</h4>
+                  <div className="text-[11px] text-tinta-fraca font-medium mt-0.5">{u.role}</div>
+                  <div className="text-[11px] text-azul-700 font-semibold mt-2 flex items-center gap-1">
                     <Calendar className="w-3.5 h-3.5" />
                     <span>{dayFormatted} de {monthName}</span>
                   </div>
