@@ -1076,4 +1076,5 @@ Objetivo: MVP SaaS ERP Hospitalar HMMV — arquitetura modular, workflow hospita
 > Seção viva: cada execução real (correção, deploy, CI) é registrada aqui de forma aditiva. Nunca remover entradas anteriores — apenas acrescentar.
 
 ### 2026-08-21
+- ci: adicionado pipeline básico de build (`.github/workflows/ci.yml`) — checkout, setup-node 20, `npm ci`, lint (`tsc --noEmit`) + build via `--if-present`. Segue o mesmo padrão já aplicado em medHMMV, recepHMMV e FarmHMMV.
 - fix(security): `firestore-enfermagem.rules` mesclado com sucesso no `firestore.rules` do FarmHMMV (mesmo projeto Firebase `farmhmmv`, confirmado via `.firebaserc`). `/plantoes` e `/escalas` voltaram a funcionar em produção.
