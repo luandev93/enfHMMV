@@ -1068,3 +1068,12 @@ INTEROPERABILIDADE
 Status: DESENVOLVIMENTO ATIVO
 
 Objetivo: MVP SaaS ERP Hospitalar HMMV — arquitetura modular, workflow hospitalar ponta a ponta, segurança, auditoria e interoperabilidade.
+
+---
+
+## Log de Alterações Operacionais
+
+> Seção viva: cada execução real (correção, deploy, CI) é registrada aqui de forma aditiva. Nunca remover entradas anteriores — apenas acrescentar.
+
+### 2026-08-21
+- fix(security): `firestore-enfermagem.rules` mesclado com sucesso no `firestore.rules` do FarmHMMV (mesmo projeto Firebase `farmhmmv`, confirmado via `.firebaserc`). `/plantoes` e `/escalas` voltaram a funcionar em produção.
