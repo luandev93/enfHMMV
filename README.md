@@ -1,177 +1,1070 @@
-# enfHMMV — migração da base
+# enfHMMV — Módulo de Enfermagem do HMMV ERP
 
-Este pacote troca a fundação do app de relatório de enfermagem. As telas
-continuam as mesmas; muda o que está embaixo delas.
+Sistema de apoio à operação de enfermagem do Hospital Municipal, concebido como módulo integrante do **HMMV ERP**.
 
-## Por que a migração
+O `enfHMMV` não deve ser tratado como um sistema isolado. Seu papel é participar do fluxo hospitalar integrado, compartilhando informações por meio de **contratos internos bem definidos**, sem acoplamento direto entre módulos.
 
-O projeto anterior tinha três problemas somados:
+---
 
-1. As regras do Firestore estavam abertas — `allow read, write: if true` em
-   `users`, `shift_reports` e `schedules`. Qualquer pessoa na internet podia ler
-   e reescrever tudo, sem login.
-2. O `projectId` e a `apiKey` estavam commitados num repositório público, então
-   o endereço do banco estava publicado junto com a porta destrancada.
-3. O PIN ficava em texto puro na coleção `users`, com padrão igual ao dia e mês
-   de nascimento — que também estava gravado ali.
+## 1. VISÃO DO PRODUTO
 
-Fechar apenas as regras não resolveria: o app não tinha login de verdade para as
-regras conferirem. Por isso a autenticação passa a ser do Firebase Auth.
+O `enfHMMV` representa a camada operacional da enfermagem dentro do ERP Hospitalar.
 
-## O que muda
+Seu objetivo é apoiar a equipe de enfermagem na organização da assistência, plantões, equipe, registros operacionais e comunicação com os demais setores do hospital.
 
-| Antes | Agora |
-|---|---|
-| Login por usuário e PIN comparados no navegador | Firebase Auth com e-mail e senha |
-| PIN em texto puro no Firestore | Senha nunca trafega nem é gravada |
-| `users`, `shift_reports`, `schedules` abertos | `usuarios`, `plantoes`, `escalas` com regras por cargo |
-| Projeto Firebase próprio | Mesmo projeto do estoque (`farmhmmv`) |
-| Autocadastro possível | Acesso criado pela coordenação |
+Arquitetura conceitual:
 
-Compartilhar o projeto com o estoque tem uma consequência boa: **um login só**.
-A mesma conta serve para o relatório de plantão e para solicitar medicamento à
-farmácia.
+```text
+                    HMMV ERP
+                       │
+        ┌──────────────┼──────────────┐
+        │              │              │
+   recepHMMV       medHMMV       FarmHMMV
+        │              │              │
+        └──────────────┼──────────────┘
+                       ↓
+                    enfHMMV
+                       │
+             Operação da Enfermagem
+                       │
+                       ↓
+              Contratos Internos
+                       │
+                       ↓
+              integra_SUS_HMMV
 
-## Arquivos
+O enfHMMV não deve possuir integração direta com RNDS ou outros serviços governamentais.
 
-| Arquivo | O que faz |
-|---|---|
-| `src/lib/firebase.ts` | conexão, coleções e leitura por período |
-| `src/lib/sessao.tsx` | sessão, cargos e troca de senha |
-| `src/components/AuthScreen.tsx` | nova tela de entrada |
-| `firestore-enfermagem.rules` | trecho a colar nas regras do estoque |
-| `firebase.json` / `.firebaserc` | publicação no segundo site do projeto |
 
-**Apague** do projeto antigo: `src/lib/supabase.ts`, `src/components/SupabaseModal.tsx`,
-`src/components/FirebaseModal.tsx`, `firebase-applet-config.json`,
-`supabase_schema.sql`, `dist.zip`, `projeto_completo.zip` e `src/data/mockUsers.ts`.
-Os três primeiros expõem configuração na interface; os demais são resíduo.
+---
 
-## Passo a passo
+2. PAPEL DO ENFHMMV NO ERP
 
-### 1. Repositório novo
+Dentro do HMMV ERP, o módulo de enfermagem deverá participar principalmente dos seguintes fluxos:
 
-```bash
-cd ~
-mkdir enfHMMV && cd enfHMMV
-git init -b main
-```
+PACIENTE
+   ↓
+RECEPÇÃO
+   ↓
+ATENDIMENTO / INTERNAÇÃO
+   ↓
+MÉDICO
+   ↓
+PRESCRIÇÃO
+   ↓
+ENFERMAGEM
+   ↓
+ADMINISTRAÇÃO DA ASSISTÊNCIA
+   ↓
+CONSUMO / FARMÁCIA
+   ↓
+AUDITORIA
 
-Copie do projeto antigo apenas: `src/components/` (menos os modais citados),
-`src/types/`, `src/data/defaultChecklist.ts`, `src/index.css`, `src/main.tsx`,
-`index.html`, `tsconfig.json`, `vite.config.ts`, `package.json`.
-Depois copie por cima os arquivos deste pacote.
+O módulo deverá funcionar como ponto operacional entre a prescrição médica, a execução da assistência e os demais setores envolvidos no cuidado.
 
-### 2. Chaves
 
-`cp .env.example .env` e preencha com as mesmas seis chaves do projeto de
-estoque — é o mesmo Firebase.
+---
 
-### 3. Regras
+3. ESTADO ATUAL
 
-Abra `firestore.rules` **no repositório do estoque**, cole o conteúdo de
-`firestore-enfermagem.rules` dentro do bloco principal e publique:
+🟢 Funcionalidades já presentes na base atual
 
-```bash
-cd ~/estoque-farmacia
-firebase deploy --only firestore:rules
-```
+O repositório já possui uma base técnica funcional relacionada à operação de enfermagem, incluindo:
 
-As regras são do projeto, não do app: existe um arquivo só, no repositório do
-estoque. Manter cópia nos dois lugares levaria a versões divergentes.
+aplicação web em React;
 
-### 4. Segundo site de hospedagem
+TypeScript;
 
-```bash
-cd ~/enfHMMV
-firebase hosting:sites:create enfhmmv
-firebase target:apply hosting enfermagem enfhmmv
-npm install
-npm run build
-firebase deploy --only hosting:enfermagem
-```
+Vite;
 
-O app fica em `https://enfhmmv.web.app`, com o estoque intacto em
-`https://farmhmmv.web.app`.
+autenticação;
 
-### 4.1 Deploy automático (GitHub Actions)
+Firebase;
 
-O repositório inclui o workflow `.github/workflows/deploy-enfermagem.yml`,
-que publica automaticamente no target `hosting:enfermagem` a cada push na
-branch `main` (e também permite execução manual). A execução manual fora da
-`main` falha por proteção explícita.
+Firestore;
 
-Para funcionar, configure em **Settings → Secrets and variables → Actions**:
+persistência local;
 
-- `GCP_SA_KEY`: conteúdo JSON completo da chave da service account
-  `github-deploy@farmhmmv.iam.gserviceaccount.com` (ou equivalente com permissão
-  de deploy no Firebase Hosting).
-- Variáveis/secrets `VITE_FB_*` (pode usar **Secrets** ou **Repository Variables**):
-  - `VITE_FB_API_KEY`
-  - `VITE_FB_AUTH_DOMAIN`
-  - `VITE_FB_PROJECT_ID`
-  - `VITE_FB_STORAGE_BUCKET`
-  - `VITE_FB_MESSAGING_SENDER_ID`
-  - `VITE_FB_APP_ID`
+usuários e equipe;
 
-O workflow gera automaticamente o `.env.production` com essas 6 chaves antes do
-build, e falha cedo se alguma estiver ausente (evita deploy com
-`auth/invalid-api-key`).
-Se a mesma chave existir em Secret e Variable, o Secret tem prioridade.
+escalas;
 
-O job usa o ambiente `production`. Se quiser aprovação manual antes de publicar,
-ative as regras de proteção desse ambiente no GitHub.
+relatórios de plantão;
 
-### 5. Acessos da equipe
+estruturas para registros operacionais;
 
-Cada pessoa da enfermagem passa a ter um documento em `usuarios/{uid}` com:
+integração com dados relacionados à Farmácia;
 
-```json
-{
-  "nome": "Maria da Silva",
-  "email": "maria@hmmv.local",
-  "ativo": true,
-  "nascimento": "1990-05-12",
-  "funcao": "enfermagem",
-  "enfermagem": {
-    "ativo": true,
-    "cargo": "Enfermeiro(a)",
-    "coren": "COREN-PE 123456",
-    "setorPadrao": "Pronto-Socorro"
-  }
-}
-```
+solicitações da enfermagem relacionadas ao estoque;
 
-O campo `funcao: "enfermagem"` libera a solicitação de medicamentos à farmácia.
-O bloco `enfermagem` libera o app de plantão. Quem for da farmácia e também da
-enfermagem pode ter `funcao: "farmaceutico"` com o bloco `enfermagem` preenchido.
+identificação de locais habilitados para solicitações;
 
-Cadastre pelo app do estoque, em **Mais › Pessoas**, e depois complete o bloco
-`enfermagem` — a tela de gestão de equipe do app de enfermagem faz isso na
-sequência da migração.
+regras de segurança do Firestore;
 
-### 6. Dados antigos
+configuração de ambiente;
 
-Os relatórios que estão no projeto `relatorio-hmmv` **não vêm sozinhos**. Se
-precisar deles, exporte antes de apagar o projeto antigo: no Console do Firebase,
-Firestore → Importar/Exportar. Depois é possível carregar em `plantoes` com
-ajuste dos campos `authorId`, que passam a apontar para o `uid` do Firebase Auth.
+automações de deploy;
 
-Se o histórico não for necessário, comece limpo — é mais simples e não arrasta o
-formato antigo.
+estrutura preparada para evolução do módulo.
 
-## Limite de anexos
 
-Anexos são gravados como base64 dentro do documento do relatório, e o Firestore
-corta em 1 MiB por documento. `salvarPlantao` recusa acima de 700 kB somados,
-com aviso claro. Se a equipe precisar anexar fotos com frequência, o caminho é
-comprimir antes de gravar ou migrar para o Cloud Storage — que hoje exige o
-plano Blaze.
+Estas funcionalidades representam o estado conhecido da base atual e não devem ser interpretadas automaticamente como cobertura completa do workflow hospitalar.
 
-## Sobre o plano gratuito
 
-O Spark dá 50.000 leituras e 20.000 escritas de documento por dia, 1 GiB de banco
-e 360 MB de tráfego diário. O volume do hospital fica bem abaixo disso. O que
-consome leitura à toa é carregar todo o histórico a cada abertura — por isso
-`listarPlantoesRecentes` traz os últimos 60 dias, e as consultas maiores pedem
-período explícito.
+---
+
+4. O QUE ESTÁ PARCIAL
+
+A base atual ainda precisa evoluir para representar um módulo completo de enfermagem integrado ao ERP.
+
+Principais áreas de consolidação:
+
+workflow assistencial;
+
+vínculo entre paciente e atendimento;
+
+vínculo entre paciente e internação;
+
+integração estruturada com prescrição médica;
+
+administração de medicamentos;
+
+registros de enfermagem;
+
+observações clínicas;
+
+evolução de enfermagem;
+
+controle de procedimentos;
+
+controle de pendências;
+
+integração estruturada com FarmHMMV;
+
+auditoria completa;
+
+contratos internos;
+
+validação de dados;
+
+testes automatizados;
+
+controle de permissões por função;
+
+rastreabilidade das alterações.
+
+
+
+---
+
+5. O QUE AINDA PRECISA SER IMPLEMENTADO
+
+As funcionalidades abaixo fazem parte do roadmap do produto e não devem ser consideradas implementadas apenas por estarem documentadas.
+
+Paciente
+
+identificação única do paciente;
+
+vínculo com cadastro central;
+
+histórico de atendimentos;
+
+vínculo com internação;
+
+localização hospitalar;
+
+setor;
+
+leito;
+
+status assistencial.
+
+
+Atendimento
+
+identificação do atendimento;
+
+data e hora;
+
+origem;
+
+setor;
+
+profissional responsável;
+
+situação do atendimento;
+
+vínculo com prescrição;
+
+vínculo com registros de enfermagem.
+
+
+Internação
+
+admissão;
+
+transferência;
+
+alta;
+
+setor;
+
+leito;
+
+histórico de movimentação;
+
+responsável pelo atendimento.
+
+
+Enfermagem
+
+avaliação de enfermagem;
+
+evolução de enfermagem;
+
+registros assistenciais;
+
+sinais vitais;
+
+observações;
+
+procedimentos;
+
+cuidados realizados;
+
+pendências;
+
+intercorrências;
+
+registro temporal dos eventos.
+
+
+Administração de medicamentos
+
+Fluxo planejado:
+
+PRESCRIÇÃO MÉDICA
+       ↓
+VALIDAÇÃO
+       ↓
+DISPENSAÇÃO
+       ↓
+ENFERMAGEM
+       ↓
+ADMINISTRAÇÃO
+       ↓
+REGISTRO
+       ↓
+AUDITORIA
+
+O registro deverá permitir rastrear, quando aplicável:
+
+paciente;
+
+medicamento;
+
+dose;
+
+via;
+
+horário;
+
+profissional;
+
+situação;
+
+observação;
+
+data e hora;
+
+origem da prescrição.
+
+
+
+---
+
+6. INTEGRAÇÃO COM FARMHMMV
+
+O enfHMMV já possui relação técnica com estruturas da Farmácia.
+
+A arquitetura definitiva deverá evitar dependência direta de implementação interna.
+
+Modelo desejado:
+
+enfHMMV
+   ↓
+CONTRATO INTERNO
+   ↓
+FarmHMMV
+
+Exemplo conceitual:
+
+Solicitação de material/medicamento
+        ↓
+Contrato de requisição
+        ↓
+FarmHMMV
+        ↓
+Validação
+        ↓
+Atendimento da solicitação
+        ↓
+Registro da movimentação
+
+O módulo de enfermagem não deve manipular diretamente saldos internos da Farmácia.
+
+A responsabilidade pelo estoque permanece no FarmHMMV.
+
+
+---
+
+7. INTEGRAÇÃO COM MEDHMMV
+
+Fluxo planejado:
+
+medHMMV
+   ↓
+PRESCRIÇÃO
+   ↓
+CONTRATO INTERNO
+   ↓
+enfHMMV
+   ↓
+EXECUÇÃO / ADMINISTRAÇÃO
+   ↓
+REGISTRO
+
+O enfHMMV não deve depender da implementação interna do medHMMV.
+
+A comunicação deverá ocorrer por contratos de domínio.
+
+
+---
+
+8. INTEGRAÇÃO COM RECEPÇÃO
+
+Fluxo planejado:
+
+recepHMMV
+   ↓
+PACIENTE
+   ↓
+ATENDIMENTO / INTERNAÇÃO
+   ↓
+CONTRATO INTERNO
+   ↓
+enfHMMV
+
+O módulo de enfermagem deverá receber somente os dados necessários para executar suas responsabilidades.
+
+Não deverá duplicar o cadastro mestre do paciente.
+
+
+---
+
+9. CONTRATOS INTERNOS
+
+Os módulos do HMMV ERP devem compartilhar contratos estáveis.
+
+Entidades relevantes:
+
+PATIENT
+ORGANIZATION
+PRACTITIONER
+PRACTITIONERROLE
+ENCOUNTER
+INTERNAÇÃO
+BED
+PRESCRIPTION
+MEDICATION
+MEDICATIONREQUEST
+MEDICATIONDISPENSE
+MEDICATIONADMINISTRATION
+OBSERVATION
+PROCEDURE
+NURSINGRECORD
+NURSINGEVOLUTION
+STOCKREQUEST
+AUDIT
+
+A implementação deverá evoluir de forma incremental:
+
+ENTIDADE
+   ↓
+MODELO
+   ↓
+CONTRATO
+   ↓
+VALIDAÇÃO
+   ↓
+SERVIÇO
+   ↓
+TESTE
+
+
+---
+
+10. AUDITORIA
+
+Dados hospitalares exigem rastreabilidade.
+
+Eventos relevantes deverão possuir, quando aplicável:
+
+usuário;
+
+função;
+
+data;
+
+hora;
+
+ação;
+
+entidade;
+
+identificador;
+
+valor anterior;
+
+novo valor;
+
+origem;
+
+correlação da operação.
+
+
+Exemplo:
+
+PROFISSIONAL
+     ↓
+ALTERAÇÃO
+     ↓
+REGISTRO DE ENFERMAGEM
+     ↓
+AUDITORIA
+
+Registros críticos não devem ser simplesmente apagados sem rastreabilidade.
+
+
+---
+
+11. SEGURANÇA
+
+Requisitos gerais:
+
+autenticação;
+
+autorização;
+
+RBAC;
+
+segregação de funções;
+
+validação de entrada;
+
+regras de acesso;
+
+auditoria;
+
+logs;
+
+tratamento seguro de erros;
+
+proteção de credenciais;
+
+secrets fora do código;
+
+ambientes separados;
+
+princípio do menor privilégio.
+
+
+Credenciais e chaves privadas nunca devem ser versionadas.
+
+Arquivos .env devem permanecer fora do controle de versão quando contiverem segredos.
+
+
+---
+
+12. DADOS SENSÍVEIS
+
+O módulo poderá manipular informações hospitalares e assistenciais.
+
+Portanto:
+
+evitar exposição desnecessária de dados;
+
+limitar acesso conforme função;
+
+registrar acessos e alterações relevantes;
+
+não armazenar informações sensíveis em logs sem necessidade;
+
+proteger credenciais;
+
+aplicar segregação de permissões;
+
+manter rastreabilidade.
+
+
+A conformidade legal e regulatória deverá ser validada separadamente antes de qualquer declaração formal de conformidade.
+
+
+---
+
+13. ARQUITETURA
+
+Arquitetura desejada:
+
+┌─────────────────────┐
+│     recepHMMV       │
+└──────────┬──────────┘
+           │
+           ↓
+┌─────────────────────┐
+│      medHMMV        │
+└──────────┬──────────┘
+           │
+           ↓
+┌─────────────────────┐
+│      enfHMMV        │
+│                     │
+│  Operação da        │
+│  Enfermagem         │
+└──────────┬──────────┘
+           │
+           ↓
+┌─────────────────────┐
+│     FarmHMMV        │
+└──────────┬──────────┘
+           │
+           ↓
+┌─────────────────────┐
+│ integra_SUS_HMMV    │
+└─────────────────────┘
+
+A representação acima é conceitual.
+
+A arquitetura definitiva deverá utilizar contratos internos para reduzir acoplamento entre os módulos.
+
+
+---
+
+14. INTEROPERABILIDADE
+
+O enfHMMV não deverá integrar diretamente com RNDS.
+
+Arquitetura:
+
+enfHMMV
+   ↓
+CONTRATO INTERNO
+   ↓
+integra_SUS_HMMV
+   ↓
+MAPPER
+   ↓
+FHIR
+   ↓
+ADAPTER GOVERNAMENTAL
+   ↓
+RNDS / SERVIÇO GOVERNAMENTAL
+
+Responsabilidade do enfHMMV:
+
+produzir dados internos consistentes.
+
+
+Responsabilidade do integra_SUS_HMMV:
+
+interoperabilidade;
+
+transformação;
+
+validação;
+
+adapters;
+
+comunicação externa.
+
+
+
+---
+
+15. SAAS
+
+A evolução futura deverá permitir:
+
+multi-tenant;
+
+múltiplos estabelecimentos;
+
+isolamento de dados;
+
+usuários;
+
+RBAC;
+
+configuração por hospital;
+
+backup;
+
+recuperação;
+
+observabilidade;
+
+suporte;
+
+implantação controlada.
+
+
+O modelo SaaS deverá ser introduzido sem comprometer a separação de responsabilidades do módulo.
+
+
+---
+
+16. RELATÓRIOS
+
+O módulo deverá evoluir para relatórios operacionais e assistenciais, incluindo potencialmente:
+
+plantões;
+
+equipe;
+
+escalas;
+
+registros;
+
+pendências;
+
+procedimentos;
+
+administração de medicamentos;
+
+intercorrências;
+
+indicadores assistenciais;
+
+auditoria.
+
+
+Os relatórios deverão respeitar as permissões do usuário.
+
+
+---
+
+17. WORKFLOW HOSPITALAR
+
+Workflow alvo:
+
+PACIENTE
+   ↓
+RECEPÇÃO
+   ↓
+ATENDIMENTO
+   ↓
+MÉDICO
+   ↓
+PRESCRIÇÃO
+   ↓
+FARMÁCIA
+   ↓
+DISPENSAÇÃO
+   ↓
+ENFERMAGEM
+   ↓
+ADMINISTRAÇÃO
+   ↓
+REGISTRO
+   ↓
+CONSUMO
+   ↓
+AUDITORIA
+   ↓
+INTEROPERABILIDADE
+
+O enfHMMV ocupa principalmente a etapa de execução e registro da assistência.
+
+
+---
+
+18. RELAÇÃO COM O FARMHMMV
+
+HMMV ERP
+                     │
+        ┌────────────┴────────────┐
+        ↓                         ↓
+    enfHMMV                  FarmHMMV
+        │                         │
+        │ solicitação             │ estoque
+        │                         │
+        └────── CONTRATO ─────────┘
+
+A enfermagem solicita.
+
+A Farmácia controla o estoque.
+
+O ERP registra a operação.
+
+
+---
+
+19. DEFINIÇÃO DO MVP
+
+Para considerar o enfHMMV parte do MVP do ERP, deverá existir pelo menos:
+
+Núcleo
+
+autenticação;
+
+usuários;
+
+permissões;
+
+equipe;
+
+pacientes;
+
+atendimentos;
+
+setores;
+
+leitos;
+
+registros de enfermagem.
+
+
+Assistência
+
+avaliação;
+
+evolução;
+
+sinais vitais;
+
+procedimentos;
+
+intercorrências;
+
+pendências.
+
+
+Medicamentos
+
+recebimento de prescrição;
+
+visualização;
+
+validação;
+
+registro de administração;
+
+integração com FarmHMMV.
+
+
+Integração
+
+contratos internos;
+
+integração com recepHMMV;
+
+integração com medHMMV;
+
+integração com FarmHMMV;
+
+eventos auditáveis.
+
+
+Segurança
+
+RBAC;
+
+auditoria;
+
+proteção de dados;
+
+validação;
+
+tratamento seguro de erros.
+
+
+
+---
+
+20. CRITÉRIOS DE ACEITAÇÃO DO MVP
+
+O módulo será considerado funcionalmente integrado quando:
+
+1. um paciente puder ser identificado no fluxo hospitalar;
+
+
+2. o atendimento puder ser associado ao paciente;
+
+
+3. a enfermagem puder acessar o contexto necessário do atendimento;
+
+
+4. uma prescrição puder chegar ao fluxo de enfermagem por contrato;
+
+
+5. a administração puder ser registrada;
+
+
+6. registros de enfermagem puderem ser auditados;
+
+
+7. solicitações à Farmácia utilizarem contrato definido;
+
+
+8. o saldo de estoque permanecer sob responsabilidade do FarmHMMV;
+
+
+9. alterações críticas forem rastreáveis;
+
+
+10. permissões impedirem acesso indevido;
+
+
+11. os módulos não dependerem diretamente da RNDS;
+
+
+12. os dados destinados à interoperabilidade possam posteriormente ser enviados ao integra_SUS_HMMV.
+
+
+
+
+---
+
+21. ROADMAP
+
+Fase 1 — Consolidação
+
+estabilizar aplicação;
+
+revisar estrutura;
+
+revisar autenticação;
+
+revisar Firestore;
+
+revisar permissões;
+
+revisar persistência;
+
+consolidar documentação.
+
+
+Fase 2 — Domínio hospitalar
+
+paciente;
+
+atendimento;
+
+internação;
+
+setor;
+
+leito;
+
+registros assistenciais.
+
+
+Fase 3 — Assistência
+
+avaliação;
+
+evolução;
+
+sinais vitais;
+
+procedimentos;
+
+intercorrências;
+
+pendências.
+
+
+Fase 4 — Integração
+
+contrato com recepHMMV;
+
+contrato com medHMMV;
+
+contrato com FarmHMMV;
+
+eventos;
+
+auditoria.
+
+
+Fase 5 — ERP
+
+workflow ponta a ponta;
+
+indicadores;
+
+relatórios;
+
+RBAC avançado;
+
+multi-tenant.
+
+
+Fase 6 — Interoperabilidade
+
+integração com integra_SUS_HMMV;
+
+mappers;
+
+FHIR;
+
+adapters;
+
+validação dos requisitos externos.
+
+
+
+---
+
+22. DEPENDÊNCIAS
+
+O desenvolvimento completo depende da evolução coordenada de:
+
+recepHMMV
+medHMMV
+enfHMMV
+FarmHMMV
+integra_SUS_HMMV
+
+Nenhum módulo deve assumir que outro sistema possui determinada funcionalidade sem que exista um contrato definido.
+
+
+---
+
+23. REGRA DE ARQUITETURA
+
+A regra central do HMMV ERP é:
+
+MÓDULO
+   ↓
+CONTRATO INTERNO
+   ↓
+SERVIÇO
+   ↓
+INTEGRAÇÃO
+
+E não:
+
+MÓDULO
+   ↓
+BANCO DO OUTRO MÓDULO
+
+ou:
+
+MÓDULO
+   ↓
+RNDS
+
+A independência modular é requisito arquitetural do produto.
+
+
+---
+
+24. GOVERNMENT READY
+
+O projeto tem como objetivo futuro alcançar uma arquitetura preparada para requisitos governamentais.
+
+Entretanto, este repositório não declara conformidade governamental.
+
+Qualquer declaração de conformidade dependerá de validação efetiva de:
+
+requisitos técnicos;
+
+segurança;
+
+proteção de dados;
+
+infraestrutura;
+
+documentação;
+
+contratos;
+
+requisitos das integrações;
+
+homologações;
+
+requisitos específicos do órgão comprador.
+
+
+
+---
+
+25. DEFINIÇÃO DE PRONTO
+
+Uma funcionalidade somente deverá ser considerada concluída quando:
+
+estiver implementada;
+
+estiver validada;
+
+possuir tratamento de erro;
+
+respeitar permissões;
+
+possuir rastreabilidade quando necessária;
+
+não quebrar contratos existentes;
+
+possuir testes quando aplicável;
+
+estiver documentada;
+
+estiver integrada ao workflow correto.
+
+
+Documentação não significa implementação.
+
+Planejamento não significa funcionalidade existente.
+
+
+---
+
+26. POSIÇÃO DO PROJETO
+
+O enfHMMV encontra-se em DESENVOLVIMENTO ATIVO.
+
+A base técnica já permite evolução do módulo, mas ainda existe trabalho para transformar o projeto em um módulo completo de enfermagem integrado ao HMMV ERP.
+
+O objetivo não é apenas possuir um sistema de enfermagem.
+
+O objetivo é construir:
+
+um ERP Hospitalar integrado, modular, auditável e orientado a workflow.
+
+
+---
+
+HMMV ERP
+
+RECEPÇÃO
+    ↓
+ATENDIMENTO
+    ↓
+MÉDICO
+    ↓
+PRESCRIÇÃO
+    ↓
+FARMÁCIA
+    ↓
+ENFERMAGEM
+    ↓
+ADMINISTRAÇÃO
+    ↓
+AUDITORIA
+    ↓
+INTEROPERABILIDADE
+
+Status: DESENVOLVIMENTO ATIVO
+
+Objetivo: MVP SaaS ERP Hospitalar HMMV — arquitetura modular, workflow hospitalar ponta a ponta, segurança, auditoria e interoperabilidade.
